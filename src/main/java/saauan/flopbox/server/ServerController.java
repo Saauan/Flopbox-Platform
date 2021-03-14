@@ -20,11 +20,21 @@ public class ServerController {
 		this.serverService = serverService;
 	}
 
+	/**
+	 * Returns a list of all the servers
+	 *
+	 * @return Returns a list of all the servers
+	 */
 	@GetMapping
 	public List<Server> getAllServers(){
-		return null;
+		return serverService.getAllServers();
 	}
 
+	/**
+	 * Adds a server to the database
+	 *
+	 * @param server the server to add
+	 */
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
 	public void addServer(@RequestBody Server server) {
