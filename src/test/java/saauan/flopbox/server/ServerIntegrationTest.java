@@ -102,6 +102,7 @@ public class ServerIntegrationTest {
 		Server anyServer = serverRepository.findAll().stream().findAny().orElseThrow();
 
 		sendRequestToModifyServer(status().isOk(), anyServer.getId(), server2);
+		System.err.println("End of request");
 
 		Assertions.assertEquals(1, serverRepository.findAll().size());
 		Server actualServer = serverRepository.findAll().stream().findAny().orElseThrow();

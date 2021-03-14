@@ -39,6 +39,7 @@ public class ServerService {
 	 * @return Returns a list of all the servers
 	 */
 	public List<Server> getAllServers() {
+		log.info("Getting all servers");
 		return serverRepository.findAll();
 	}
 
@@ -50,6 +51,7 @@ public class ServerService {
 	 * @throws ServerNotFoundException if the server does not exist
 	 */
 	public Server getServer(int serverId) {
+		log.info(String.format("Getting server %s", serverId));
 		return findServerOrThrow(serverId);
 	}
 
@@ -70,6 +72,7 @@ public class ServerService {
 	 * @throws ServerNotFoundException if the server does not exist
 	 */
 	public void modifyServer(Server serverModifications, int serverId) {
+		log.info(String.format("Modifying server %s", serverId));
 		Server serverToModify = findServerOrThrow(serverId);
 		if(serverModifications.getPort() != 0) serverToModify.setPort(serverModifications.getPort());
 		if(serverModifications.getUrl() != null) serverToModify.setUrl(serverModifications.getUrl());
@@ -83,6 +86,7 @@ public class ServerService {
 	 * @throws ServerNotFoundException if the server does not exist
 	 */
 	public void deleteServer(int serverId) {
+		log.info(String.format("Deleting server %s", serverId));
 		Server serverToDelete = findServerOrThrow(serverId);
 		serverRepository.delete(serverToDelete);
 	}
