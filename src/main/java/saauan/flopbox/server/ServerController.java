@@ -48,7 +48,7 @@ public class ServerController {
 
 	@GetMapping("/{serverId}")
 	public Server getServer(@PathVariable int serverId) {
-		return null;
+		return serverService.getServer(serverId);
 	}
 
 	@PatchMapping("/{serverId}")

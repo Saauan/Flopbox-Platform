@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import saauan.flopbox.Utils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @CommonsLog
@@ -39,5 +40,21 @@ public class ServerService {
 	 */
 	public List<Server> getAllServers() {
 		return serverRepository.findAll();
+	}
+
+	/**
+	 * Gets the server from the database
+	 *
+	 * @param serverId the id of the server
+	 * @return the server corresponding to `serverId`
+	 * @throws ServerNotFoundException if the server does not exist
+	 */
+	public Server getServer(int serverId) {
+		Optional<Server> server = serverRepository.findById(serverId);
+		if(server.isEmpty()) {
+			Utils.logAndThrow(log, ServerNotFoundException.class, String.format("server %d was not found", serverId));
+			assert false: "Should never arrive here";
+		}
+		return server.get();
 	}
 }
