@@ -1,16 +1,23 @@
 package saauan.flopbox.user;
 
 import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Service;
 import saauan.flopbox.Utils;
 import saauan.flopbox.exceptions.ResourceAlreadyExistException;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @CommonsLog
 public class UserService {
+
+	// TODO: Refactor into interfaces
+
 	private final UserRepository userRepository;
 	private final static String alphanumericRegex = "[a-zA-Z0-9]+";
 
@@ -73,5 +80,29 @@ public class UserService {
 	public void deleteUser(String username) {
 		User user = Utils.findObjectOrThrow(userRepository, username, log);
 		userRepository.delete(user);
+	}
+
+	public String login(String username, String password) {
+		Optional<User> optionalUser = userRepository.login(username, password);
+		if(optionalUser.isPresent()) {
+			String token = UUID.randomUUID().toString();
+			User user = optionalUser.get();
+			user.setToken(token);
+			userRepository.save(user);
+			return token;
+		}
+		log.error("No user was found while login in");
+		return StringUtils.EMPTY;
+	}
+
+	public Optional<org.springframework.security.core.userdetails.User> findByToken(String token) {
+		Optional<User> optionalUser = userRepository.findByToken(token);
+		if(optionalUser.isPresent()) {
+			User appUser = optionalUser.get();
+			org.springframework.security.core.userdetails.User user = new org.springframework.security.core.userdetails.User(appUser.getUsername(), appUser.getPassword(), true, true, true, true,
+					AuthorityUtils.createAuthorityList("USER"));
+			return Optional.of(user);
+		}
+		return Optional.empty();
 	}
 }
