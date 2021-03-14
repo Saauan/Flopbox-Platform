@@ -8,7 +8,6 @@ import saauan.flopbox.exceptions.ResourceAlreadyExistException;
 import saauan.flopbox.exceptions.ResourceNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @CommonsLog
@@ -54,16 +53,7 @@ public class ServerService {
 	 */
 	public Server getServer(int serverId) {
 		log.info(String.format("Getting server %s", serverId));
-		return findServerOrThrow(serverId);
-	}
-
-	private Server findServerOrThrow(int serverId) {
-		Optional<Server> server = serverRepository.findById(serverId);
-		if(server.isEmpty()) {
-			Utils.logAndThrow(log, ResourceNotFoundException.class, String.format("server %d was not found", serverId));
-			assert false: "Should never arrive here";
-		}
-		return server.get();
+		return Utils.findObjectOrThrow(serverRepository, serverId, log);
 	}
 
 	/**
@@ -75,7 +65,7 @@ public class ServerService {
 	 */
 	public void modifyServer(Server serverModifications, int serverId) {
 		log.info(String.format("Modifying server %s", serverId));
-		Server serverToModify = findServerOrThrow(serverId);
+		Server serverToModify = Utils.findObjectOrThrow(serverRepository, serverId, log);
 		if(serverModifications.getPort() != 0) serverToModify.setPort(serverModifications.getPort());
 		if(serverModifications.getUrl() != null) serverToModify.setUrl(serverModifications.getUrl());
 		serverRepository.save(serverToModify);
@@ -89,7 +79,7 @@ public class ServerService {
 	 */
 	public void deleteServer(int serverId) {
 		log.info(String.format("Deleting server %s", serverId));
-		Server serverToDelete = findServerOrThrow(serverId);
+		Server serverToDelete = Utils.findObjectOrThrow(serverRepository, serverId, log);
 		serverRepository.delete(serverToDelete);
 	}
 }

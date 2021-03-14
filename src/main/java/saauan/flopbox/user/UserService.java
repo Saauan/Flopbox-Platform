@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import saauan.flopbox.Utils;
 import saauan.flopbox.exceptions.ResourceAlreadyExistException;
 
+import java.util.List;
+
 @Service
 @CommonsLog
 public class UserService {
@@ -42,5 +44,22 @@ public class UserService {
 		return !user.getUsername().isBlank() &&
 				!user.getPassword().isBlank() &&
 				isUsernameAlphanumeric(user.getUsername());
+	}
+
+	/**
+	 * Returns all users
+	 * @return a list containing all the users
+	 */
+	public List<User> getAllUsers() {
+		return userRepository.findAll();
+	}
+
+	/**
+	 * Returns the user with the same username as `username`
+	 * @param username the username of the user
+	 * @return a user with a corresponding username
+	 */
+	public User getUser(String username) {
+		return Utils.findObjectOrThrow(userRepository, username, log);
 	}
 }

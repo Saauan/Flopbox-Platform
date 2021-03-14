@@ -21,7 +21,7 @@ public class UserController {
 
 	@GetMapping
 	private List<User> getAllUsers(){
-		return null;
+		return userService.getAllUsers();
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)
@@ -37,7 +37,7 @@ public class UserController {
 
 	@GetMapping("/{username}")
 	private User getUser(@PathVariable String username){
-		return null;
+		return userService.getUser(username);
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)
