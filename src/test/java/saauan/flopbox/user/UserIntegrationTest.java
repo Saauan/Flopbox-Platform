@@ -11,8 +11,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
-import saauan.flopbox.server.Server;
-import saauan.flopbox.server.ServerRepository;
 
 import java.util.HashSet;
 import java.util.List;

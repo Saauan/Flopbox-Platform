@@ -1,20 +1,18 @@
 package saauan.flopbox.server;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import saauan.flopbox.AbstractIntegrationTest;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,10 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest
-public class ServerIntegrationTest extends saauan.flopbox.AbstractIntegrationTest {
+public class ServerIntegrationTest extends AbstractIntegrationTest {
 
+	public static final String BEARER = "Bearer ";
 	@Autowired
 	private ServerRepository serverRepository;
+
 	private final String serversUrl = "/servers";
 	private Server server1 = new Server(new URL("https://www.baeldung.com"), 28);
 	private Server server2 = new Server(new URL("https://www.baeldung2.com"), 29);
@@ -40,10 +40,13 @@ public class ServerIntegrationTest extends saauan.flopbox.AbstractIntegrationTes
 	public ServerIntegrationTest() throws MalformedURLException {
 	}
 
+	@SneakyThrows
 	@Override
 	@BeforeEach
 	public void setUp() {
+		super.setUp();
 		serverRepository.deleteAll();
+		authenticate();
 	}
 
 	@Test
@@ -131,7 +134,8 @@ public class ServerIntegrationTest extends saauan.flopbox.AbstractIntegrationTes
 		return this.mockMvc.perform(MockMvcRequestBuilders.post(serversUrl)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonBody)
-				.characterEncoding("utf-8"))
+				.characterEncoding("utf-8")
+				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
@@ -141,28 +145,32 @@ public class ServerIntegrationTest extends saauan.flopbox.AbstractIntegrationTes
 		return this.mockMvc.perform(MockMvcRequestBuilders.patch(serversUrl + "/" + id)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonBody)
-				.characterEncoding("utf-8"))
+				.characterEncoding("utf-8")
+				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
 
 	private MvcResult sendRequestToGetServers(ResultMatcher expectedResponseCode) throws Exception {
 		return this.mockMvc.perform(get(serversUrl)
-				.characterEncoding("utf-8"))
+				.characterEncoding("utf-8")
+				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
 
 	private MvcResult sendRequestToGetServer(ResultMatcher expectedResponseCode, int serverId) throws Exception {
 		return this.mockMvc.perform(get(serversUrl + "/" + serverId)
-				.characterEncoding("utf-8"))
+				.characterEncoding("utf-8")
+				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
 
 	private MvcResult sendRequestToDeleteServer(ResultMatcher expectedResponseCode, int serverId) throws Exception {
 		return this.mockMvc.perform(delete(serversUrl + "/" + serverId)
-				.characterEncoding("utf-8"))
+				.characterEncoding("utf-8")
+				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
