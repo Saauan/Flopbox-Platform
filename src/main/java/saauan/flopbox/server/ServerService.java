@@ -50,11 +50,40 @@ public class ServerService {
 	 * @throws ServerNotFoundException if the server does not exist
 	 */
 	public Server getServer(int serverId) {
+		return findServerOrThrow(serverId);
+	}
+
+	private Server findServerOrThrow(int serverId) {
 		Optional<Server> server = serverRepository.findById(serverId);
 		if(server.isEmpty()) {
 			Utils.logAndThrow(log, ServerNotFoundException.class, String.format("server %d was not found", serverId));
 			assert false: "Should never arrive here";
 		}
 		return server.get();
+	}
+
+	/**
+	 * Modifies a server in the database
+	 *
+	 * @param serverModifications a server object containing changes to apply to the server
+	 * @param serverId the id of the server to modify
+	 * @throws ServerNotFoundException if the server does not exist
+	 */
+	public void modifyServer(Server serverModifications, int serverId) {
+		Server serverToModify = findServerOrThrow(serverId);
+		if(serverModifications.getPort() != 0) serverToModify.setPort(serverModifications.getPort());
+		if(serverModifications.getUrl() != null) serverToModify.setUrl(serverModifications.getUrl());
+		serverRepository.save(serverToModify);
+	}
+
+	/**
+	 * Deletes a server from the database
+	 *
+	 * @param serverId the id of the server to delete
+	 * @throws ServerNotFoundException if the server does not exist
+	 */
+	public void deleteServer(int serverId) {
+		Server serverToDelete = findServerOrThrow(serverId);
+		serverRepository.delete(serverToDelete);
 	}
 }

@@ -53,12 +53,12 @@ public class ServerController {
 
 	@PatchMapping("/{serverId}")
 	public void modifyServer(@RequestBody Server server, @PathVariable int serverId){
-
+		serverService.modifyServer(server, serverId);
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{serverId}")
 	public void deleteServer(@PathVariable int serverId) {
-
+		serverService.deleteServer(serverId);
 	}
 }
