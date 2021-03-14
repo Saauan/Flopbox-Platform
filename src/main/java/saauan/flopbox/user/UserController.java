@@ -32,6 +32,9 @@ public class UserController {
 		} catch (ResourceAlreadyExistException e) {
 			throw new ResponseStatusException(
 					HttpStatus.FORBIDDEN, e.getMessage(), e);
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(
+					HttpStatus.BAD_REQUEST, e.getMessage(), e);
 		}
 	}
 
@@ -43,6 +46,6 @@ public class UserController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{username}")
 	private void deleteUser(@PathVariable String username){
-
+		userService.deleteUser(username);
 	}
 }

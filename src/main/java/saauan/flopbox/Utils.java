@@ -20,7 +20,7 @@ public class Utils {
 	public <T, ID> T findObjectOrThrow(JpaRepository<T, ID> repository, ID id, Log log) {
 		Optional<T> object = repository.findById(id);
 		if(object.isEmpty()) {
-			logAndThrow(log, ResourceNotFoundException.class, String.format("resource %d was not found", id));
+			logAndThrow(log, ResourceNotFoundException.class, String.format("resource %s was not found", id));
 			assert false: "Should never arrive here";
 		}
 		return object.get();

@@ -89,7 +89,7 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void getUserFailsIfUserDoesNotExist() throws Exception {
-		sendRequestToGetUser(status().isNotFound(), "NotExist");
+		sendRequestToGetUser(status().isNotFound(), "notexist");
 	}
 
 	@Test

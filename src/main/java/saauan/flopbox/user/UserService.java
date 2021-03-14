@@ -58,8 +58,20 @@ public class UserService {
 	 * Returns the user with the same username as `username`
 	 * @param username the username of the user
 	 * @return a user with a corresponding username
+	 * @throws saauan.flopbox.exceptions.ResourceNotFoundException if the user if not found
 	 */
 	public User getUser(String username) {
 		return Utils.findObjectOrThrow(userRepository, username, log);
+	}
+
+	/**
+	 * Deletes a user from the database
+	 * @param username the username of the user to delete
+	 *
+	 * @throws saauan.flopbox.exceptions.ResourceNotFoundException if the user if not found
+	 */
+	public void deleteUser(String username) {
+		User user = Utils.findObjectOrThrow(userRepository, username, log);
+		userRepository.delete(user);
 	}
 }
