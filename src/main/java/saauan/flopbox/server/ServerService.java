@@ -4,9 +4,10 @@ import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import saauan.flopbox.Utils;
+import saauan.flopbox.exceptions.ResourceAlreadyExistException;
+import saauan.flopbox.exceptions.ResourceNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @CommonsLog
@@ -23,12 +24,12 @@ public class ServerService {
 	 * Adds a server to the database
 	 *
 	 * @param server the server to add
-	 * @throws ServerAlreadyExistException if the server already exists
+	 * @throws ResourceAlreadyExistException if the server already exists
 	 */
 	public void addServer(Server server) {
 		log.info(String.format("Adding server %s", server));
 		if (this.serverRepository.findByUrl(server.getUrl()) != null) {
-			Utils.logAndThrow(log, ServerAlreadyExistException.class, String.format("Server %s already exists", server.getUrl()));
+			Utils.logAndThrow(log, ResourceAlreadyExistException.class, String.format("Server %s already exists", server.getUrl()));
 		}
 		serverRepository.save(server);
 	}
@@ -48,20 +49,11 @@ public class ServerService {
 	 *
 	 * @param serverId the id of the server
 	 * @return the server corresponding to `serverId`
-	 * @throws ServerNotFoundException if the server does not exist
+	 * @throws ResourceNotFoundException if the server does not exist
 	 */
 	public Server getServer(int serverId) {
 		log.info(String.format("Getting server %s", serverId));
-		return findServerOrThrow(serverId);
-	}
-
-	private Server findServerOrThrow(int serverId) {
-		Optional<Server> server = serverRepository.findById(serverId);
-		if(server.isEmpty()) {
-			Utils.logAndThrow(log, ServerNotFoundException.class, String.format("server %d was not found", serverId));
-			assert false: "Should never arrive here";
-		}
-		return server.get();
+		return Utils.findObjectOrThrow(serverRepository, serverId, log);
 	}
 
 	/**
@@ -69,11 +61,11 @@ public class ServerService {
 	 *
 	 * @param serverModifications a server object containing changes to apply to the server
 	 * @param serverId the id of the server to modify
-	 * @throws ServerNotFoundException if the server does not exist
+	 * @throws ResourceNotFoundException if the server does not exist
 	 */
 	public void modifyServer(Server serverModifications, int serverId) {
 		log.info(String.format("Modifying server %s", serverId));
-		Server serverToModify = findServerOrThrow(serverId);
+		Server serverToModify = Utils.findObjectOrThrow(serverRepository, serverId, log);
 		if(serverModifications.getPort() != 0) serverToModify.setPort(serverModifications.getPort());
 		if(serverModifications.getUrl() != null) serverToModify.setUrl(serverModifications.getUrl());
 		serverRepository.save(serverToModify);
@@ -83,11 +75,11 @@ public class ServerService {
 	 * Deletes a server from the database
 	 *
 	 * @param serverId the id of the server to delete
-	 * @throws ServerNotFoundException if the server does not exist
+	 * @throws ResourceNotFoundException if the server does not exist
 	 */
 	public void deleteServer(int serverId) {
 		log.info(String.format("Deleting server %s", serverId));
-		Server serverToDelete = findServerOrThrow(serverId);
+		Server serverToDelete = Utils.findObjectOrThrow(serverRepository, serverId, log);
 		serverRepository.delete(serverToDelete);
 	}
 }

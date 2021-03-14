@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import saauan.flopbox.exceptions.ResourceAlreadyExistException;
 
 import java.util.List;
 
 @RestController()
 @RequestMapping("servers")
-@CommonsLog
 public class ServerController {
 
 	private final ServerService serverService;
@@ -40,7 +40,7 @@ public class ServerController {
 	public void addServer(@RequestBody Server server) {
 		try {
 			serverService.addServer(server);
-		} catch (ServerAlreadyExistException e) {
+		} catch (ResourceAlreadyExistException e) {
 			throw new ResponseStatusException(
 					HttpStatus.FORBIDDEN, e.getMessage(), e);
 		}

@@ -29,25 +29,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest
-@WebAppConfiguration
-public class ServerIntegrationTest {
+public class ServerIntegrationTest extends saauan.flopbox.AbstractIntegrationTest {
 
 	@Autowired
-	private WebApplicationContext wac;
-	@Autowired
 	private ServerRepository serverRepository;
-	private MockMvc mockMvc;
 	private final String serversUrl = "/servers";
 	private Server server1 = new Server(new URL("https://www.baeldung.com"), 28);
 	private Server server2 = new Server(new URL("https://www.baeldung2.com"), 29);
-	ObjectMapper objectMapper = new ObjectMapper();
 
 	public ServerIntegrationTest() throws MalformedURLException {
 	}
 
+	@Override
 	@BeforeEach
 	public void setUp() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 		serverRepository.deleteAll();
 	}
 

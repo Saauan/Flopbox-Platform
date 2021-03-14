@@ -2,7 +2,6 @@ package saauan.flopbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import saauan.flopbox.server.ServerNotFoundException;
+import saauan.flopbox.exceptions.ResourceNotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +33,8 @@ public class RestExceptionHandler
 
 	}
 
-	@ExceptionHandler(value = {ServerNotFoundException.class})
-	protected ResponseEntity<Object> handleUnexpectedDatabaseStateException(ServerNotFoundException ex,
+	@ExceptionHandler(value = {ResourceNotFoundException.class})
+	protected ResponseEntity<Object> handleUnexpectedDatabaseStateException(ResourceNotFoundException ex,
 																			WebRequest request) {
 		return handleException(HttpStatus.NOT_FOUND,
 				"The request server was not found : " + ex.getMessage(), ex,
