@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
+import saauan.flopbox.user.User;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +37,8 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 	private final String serversUrl = "/servers";
 	private Server server1 = new Server(new URL("https://www.baeldung.com"), 28);
 	private Server server2 = new Server(new URL("https://www.baeldung2.com"), 29);
+	private String authToken;
+	private User currentUser;
 
 	public ServerIntegrationTest() throws MalformedURLException {
 	}
@@ -46,7 +49,15 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 	public void setUp() {
 		super.setUp();
 		serverRepository.deleteAll();
-		authenticate();
+		authenticate(authUser1);
+		authToken = authTokens.get(authUser1);
+		currentUser = authUser1;
+	}
+
+	private void authAndChangeUser(User user) throws Exception {
+		authenticate(user);
+		currentUser = user;
+		authToken = authTokens.get(user);
 	}
 
 	@Test
@@ -54,9 +65,12 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 		Assertions.assertTrue(serverRepository.findAll().isEmpty());
 
 		sendRequestToCreateServer(status().isCreated(), server1);
+		server1.setUser(currentUser);
 
 		Assertions.assertEquals(1, serverRepository.findAll().size());
-		Assertions.assertEquals(server1, serverRepository.findAll().stream().findFirst().orElseThrow());
+		Server actualServer = serverRepository.findAll().stream().findFirst().orElseThrow();
+		Assertions.assertEquals(server1, actualServer);
+		Assertions.assertEquals(authUser1, actualServer.getUser());
 	}
 
 	@Test
@@ -66,13 +80,32 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void getServersReturnsAListOfServers() throws Exception {
+	public void canCreateTwiceServerWithSameUrlButWithDifferentUser() throws Exception {
+		sendRequestToCreateServer(status().isCreated(), server1);
+
+		authAndChangeUser(authUser2);
+
+		sendRequestToCreateServer(status().isCreated(), server1);
+
+		MvcResult result = sendRequestToGetServer(status().isOk(), serverRepository.findByUser(authUser2).stream().findFirst().orElseThrow().getId());
+		Server actualServer = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<Server>(){});
+		Assertions.assertEquals(server1, actualServer);
+	}
+
+
+	@Test
+	public void getServersReturnsAListOfServersBelongingToTheUser() throws Exception {
+		sendRequestToCreateServer(status().isCreated(), server1);
+
+		authAndChangeUser(authUser2);
+
 		sendRequestToCreateServer(status().isCreated(), server1);
 		sendRequestToCreateServer(status().isCreated(), server2);
 
 		MvcResult result = sendRequestToGetServers(status().isOk());
 		List<Server> actualServers = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<Server>>(){});
 
+		Assertions.assertEquals(3, serverRepository.findAll().size());
 		Assertions.assertEquals(2, actualServers.size());
 		Assertions.assertEquals(Set.of(server1, server2), new HashSet<>(actualServers));
 	}
@@ -95,6 +128,15 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void cannotGetAServerThatDoesNotBelongToTheUser() throws Exception {
+		sendRequestToCreateServer(status().isCreated(), server1);
+
+		authAndChangeUser(authUser2);
+
+		sendRequestToGetServer(status().isForbidden(), serverRepository.findByUrl(server1.getUrl()).getId());
+	}
+
+	@Test
 	public void modifyServerModifiesTheServer() throws Exception {
 		sendRequestToCreateServer(status().isCreated(), server1);
 		Server anyServer = serverRepository.findAll().stream().findAny().orElseThrow();
@@ -110,6 +152,15 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 	@Test
 	public void cannotModifyAServerIfNotItDoesNotExist() throws Exception {
 		sendRequestToModifyServer(status().isNotFound(), 1, server2);
+	}
+
+	@Test
+	public void cannotModifyAServerThatDoesNotBelongToTheUser() throws Exception {
+		sendRequestToCreateServer(status().isCreated(), server1);
+
+		authAndChangeUser(authUser2);
+
+		sendRequestToModifyServer(status().isForbidden(), serverRepository.findByUrl(server1.getUrl()).getId(), server2);
 	}
 
 	@Test
@@ -129,8 +180,28 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 		sendRequestToDeleteServer(status().isNotFound(), 1);
 	}
 
+	@Test
+	public void cannotDeleteAServerThatDoesNotBelongToTheUser() throws Exception {
+		sendRequestToCreateServer(status().isCreated(), server1);
+
+		authAndChangeUser(authUser2);
+
+		sendRequestToDeleteServer(status().isForbidden(), serverRepository.findByUrl(server1.getUrl()).getId());
+	}
+
+	@Test
+	public void canDeleteAUserIfItHasServers() throws Exception {
+		sendRequestToCreateServer(status().isCreated(), server1);
+		Assertions.assertEquals(1, serverRepository.findAll().size());
+
+		sendRequestToDeleteUser(status().isNoContent(), authUser1.getUsername());
+
+		Assertions.assertEquals(0, serverRepository.findAll().size());
+	}
+
 	private MvcResult sendRequestToCreateServer(ResultMatcher expectedResponseCode, Server server) throws Exception {
 		String jsonBody = objectMapper.writeValueAsString(server);
+		server.setUser(currentUser);
 		return this.mockMvc.perform(MockMvcRequestBuilders.post(serversUrl)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonBody)
@@ -142,7 +213,8 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 
 	private MvcResult sendRequestToModifyServer(ResultMatcher expectedResponseCode, int id, Server server) throws Exception {
 		String jsonBody = objectMapper.writeValueAsString(server);
-		return this.mockMvc.perform(MockMvcRequestBuilders.patch(serversUrl + "/" + id)
+		server.setUser(currentUser);
+		return this.mockMvc.perform(MockMvcRequestBuilders.put(serversUrl + "/" + id)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonBody)
 				.characterEncoding("utf-8")

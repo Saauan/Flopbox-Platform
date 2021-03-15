@@ -1,6 +1,5 @@
 package saauan.flopbox.server;
 
-import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -29,8 +28,13 @@ public class ServerController {
 	 */
 	@GetMapping
 	public List<Server> getAllServers(@RequestHeader HttpHeaders headers){
-		System.err.println(StringUtils.removeStart(headers.get(HttpHeaders.AUTHORIZATION).get(0), "Bearer").trim());
-		return serverService.getAllServers();
+		return serverService.getAllServers(getToken(headers));
+	}
+
+	public static String getToken(HttpHeaders headers) {
+		List<String> auth = headers.get(HttpHeaders.AUTHORIZATION);
+		assert auth != null;
+		return StringUtils.removeStart(auth.stream().findFirst().orElseThrow(), "Bearer").trim();
 	}
 
 	/**
@@ -40,9 +44,11 @@ public class ServerController {
 	 */
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
-	public void addServer(@RequestBody Server server) {
+	public void addServer(@RequestBody Server server,
+						  @RequestHeader HttpHeaders headers) {
 		try {
-			serverService.addServer(server);
+			serverService.addServer(server, getToken(headers));
+			// Renvoyer id du serveur
 		} catch (ResourceAlreadyExistException e) {
 			throw new ResponseStatusException(
 					HttpStatus.FORBIDDEN, e.getMessage(), e);
@@ -50,18 +56,22 @@ public class ServerController {
 	}
 
 	@GetMapping("/{serverId}")
-	public Server getServer(@PathVariable int serverId) {
-		return serverService.getServer(serverId);
+	public Server getServer(@PathVariable int serverId,
+							@RequestHeader HttpHeaders headers) {
+		return serverService.getServer(serverId, getToken(headers));
 	}
 
-	@PatchMapping("/{serverId}")
-	public void modifyServer(@RequestBody Server server, @PathVariable int serverId){
-		serverService.modifyServer(server, serverId);
+	@PutMapping("/{serverId}")
+	public void modifyServer(@RequestBody Server server,
+							 @PathVariable int serverId,
+							 @RequestHeader HttpHeaders headers){
+		serverService.modifyServer(server, serverId, getToken(headers));
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{serverId}")
-	public void deleteServer(@PathVariable int serverId) {
-		serverService.deleteServer(serverId);
+	public void deleteServer(@PathVariable int serverId,
+							 @RequestHeader HttpHeaders headers) {
+		serverService.deleteServer(serverId, getToken(headers));
 	}
 }

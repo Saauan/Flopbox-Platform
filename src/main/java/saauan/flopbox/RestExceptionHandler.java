@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import saauan.flopbox.exceptions.ResourceNotFoundException;
+import saauan.flopbox.server.IllegalServerAccessException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,10 +35,18 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {ResourceNotFoundException.class})
-	protected ResponseEntity<Object> handleUnexpectedDatabaseStateException(ResourceNotFoundException ex,
-																			WebRequest request) {
+	protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex,
+																	 WebRequest request) {
 		return handleException(HttpStatus.NOT_FOUND,
 				"The request server was not found : " + ex.getMessage(), ex,
+				request);
+	}
+
+	@ExceptionHandler(value = {IllegalServerAccessException.class})
+	protected ResponseEntity<Object> handleIllegalServerAccessException(IllegalServerAccessException ex,
+																	 WebRequest request) {
+		return handleException(HttpStatus.FORBIDDEN,
+				"The requested server cannot be accessed : " + ex.getMessage(), ex,
 				request);
 	}
 

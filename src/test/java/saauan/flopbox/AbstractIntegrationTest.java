@@ -13,19 +13,26 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import saauan.flopbox.user.User;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 public class AbstractIntegrationTest {
 	protected MockMvc mockMvc;
 	protected ObjectMapper objectMapper = new ObjectMapper();
-	protected static String authToken;
-	protected String username = "Tristan";
-	protected String password = "Scooby";
-	protected static boolean isAuthenticated;
+	protected static Map<User, String> authTokens = new HashMap<>();
+	protected User authUser1 = new User("Tristan", "Scooby");
+	protected User authUser2 = new User("Anthony", "Doo");
+	protected static Map<User, Boolean> isAuthenticated = new HashMap<>();
+	protected static Map<User, String> userToToken = new HashMap<>();
+
+	private final String usersUrl = "/users";
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -35,29 +42,48 @@ public class AbstractIntegrationTest {
 		mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
 	}
 
-	protected void authenticate() throws Exception {
-		if(!isAuthenticated){
-			sendRequestToCreateUser(status().isCreated(), new User(username, password));
-			MvcResult result = sendRequestToAuthenticate(status().isOk());
-			authToken = result.getResponse().getContentAsString();
-			assert authToken != null;
-			isAuthenticated = true;
+	protected void authenticate(User user) throws Exception {
+		if(!isAuthenticated.containsKey(user)){
+			sendRequestToCreateUser(status().isCreated(), user);
+			MvcResult result = sendRequestToAuthenticate(status().isOk(), user);
+			authTokens.put(user, result.getResponse().getContentAsString());
+			isAuthenticated.put(user, true);
 		}
-
 	}
 
-	private MvcResult sendRequestToAuthenticate(ResultMatcher expectedResponseCode) throws Exception {
-		return this.mockMvc.perform(post(String.format("/token?username=%s&password=%s", username, password))
+	private MvcResult sendRequestToAuthenticate(ResultMatcher expectedResponseCode, User user) throws Exception {
+		return this.mockMvc.perform(post(String.format("/token?username=%s&password=%s", user.getUsername(), user.getPassword()))
 				.characterEncoding("utf-8"))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
 
-	private MvcResult sendRequestToCreateUser(ResultMatcher expectedResponseCode, User user) throws Exception {
+	protected MvcResult sendRequestToCreateUser(ResultMatcher expectedResponseCode, User user) throws Exception {
 		String jsonBody = objectMapper.writeValueAsString(user);
-		return this.mockMvc.perform(MockMvcRequestBuilders.post("/users")
+		return this.mockMvc.perform(MockMvcRequestBuilders.post(usersUrl)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonBody)
+				.characterEncoding("utf-8"))
+				.andExpect(expectedResponseCode)
+				.andReturn();
+	}
+
+	protected MvcResult sendRequestToGetUsers(ResultMatcher expectedResponseCode) throws Exception {
+		return this.mockMvc.perform(MockMvcRequestBuilders.get(usersUrl)
+				.characterEncoding("utf-8"))
+				.andExpect(expectedResponseCode)
+				.andReturn();
+	}
+
+	protected MvcResult sendRequestToGetUser(ResultMatcher expectedResponseCode, String username) throws Exception {
+		return this.mockMvc.perform(get(usersUrl + "/" + username)
+				.characterEncoding("utf-8"))
+				.andExpect(expectedResponseCode)
+				.andReturn();
+	}
+
+	protected MvcResult sendRequestToDeleteUser(ResultMatcher expectedResponseCode, String username) throws Exception {
+		return this.mockMvc.perform(delete(usersUrl + "/" + username)
 				.characterEncoding("utf-8"))
 				.andExpect(expectedResponseCode)
 				.andReturn();

@@ -1,6 +1,7 @@
 package saauan.flopbox.server;
 
 import lombok.*;
+import saauan.flopbox.user.User;
 
 import javax.persistence.*;
 import java.net.URL;
@@ -30,4 +31,8 @@ public class Server {
 
 	@NonNull
 	private int port;
+
+	@ManyToOne
+	@EqualsAndHashCode.Include
+	private User user;
 }

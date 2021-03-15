@@ -25,7 +25,6 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private UserRepository userRepository;
-	private final String usersUrl = "/users";
 	private User user1 = new User("saauan", "marshmallow");
 	private User user2 = new User("dootris", "scoob");
 
@@ -107,34 +106,9 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 		sendRequestToDeleteUser(status().isNotFound(), "NotExist");
 	}
 
-	private MvcResult sendRequestToCreateUser(ResultMatcher expectedResponseCode, User user) throws Exception {
-		String jsonBody = objectMapper.writeValueAsString(user);
-		return this.mockMvc.perform(MockMvcRequestBuilders.post(usersUrl)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(jsonBody)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
+	@Test
+	public void canDeleteUserAndItsServers() throws Exception {
+		authenticate(authUser1);
 	}
 
-	private MvcResult sendRequestToGetUsers(ResultMatcher expectedResponseCode) throws Exception {
-		return this.mockMvc.perform(get(usersUrl)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToGetUser(ResultMatcher expectedResponseCode, String username) throws Exception {
-		return this.mockMvc.perform(get(usersUrl + "/" + username)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToDeleteUser(ResultMatcher expectedResponseCode, String username) throws Exception {
-		return this.mockMvc.perform(delete(usersUrl + "/" + username)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
 }
