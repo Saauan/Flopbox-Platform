@@ -1,30 +1,24 @@
 package saauan.flopbox.ftp;
 
-import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
-import org.springframework.stereotype.Component;
 import saauan.flopbox.server.Server;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
-@Component
-public class FTPConnector {
-	public List<FTPFile> list(Server server, String path, String username, String password) {
-		try {
-			FTPClient ftpClient = new FTPClient();
-			ftpClient.connect(server.getUrl().toString(), server.getPort());
-			if (username != null && !username.isBlank()) {
-				if (!ftpClient.login(username, password)) {
-					throw new FTPLoginException(String.format("Wrong user or pass for server %s", server));
-				}
-			}
-			List<FTPFile> files = Arrays.asList(ftpClient.listFiles(path));
-			return files;
-
-		} catch (IOException e) {
-			throw new FTPConnectException(String.format("Could not connect to %s", server));
-		}
-	}
+/**
+ * Connects to a FTP server and sends commands to it
+ */
+public interface FTPConnector {
+	/**
+	 * Sends the LIST command and return a list of FTP Files resulting from the list
+	 *
+	 * @param server   the server to connect to
+	 * @param path     the path of the list
+	 * @param username the username of the userr
+	 * @param password the password of the user
+	 * @return a list of FTP Files
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error during the operation
+	 */
+	List<FTPFile> list(Server server, String path, String username, String password);
 }

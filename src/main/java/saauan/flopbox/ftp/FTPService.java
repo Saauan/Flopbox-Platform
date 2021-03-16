@@ -26,6 +26,18 @@ public class FTPService {
 		this.ftpConnector = ftpConnector;
 	}
 
+	/**
+	 * Returns a list of files contained in the path, on the FTP server.
+	 *
+	 * @param serverId the id of the server
+	 * @param token    the authentication token of the user
+	 * @param path     the path where to perform the list
+	 * @param username the FTP username of the user
+	 * @param password the FTP password of the user
+	 * @return a list of FTP files
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error while performing the operation on the server
+	 */
 	public List<FTPFile> list(int serverId, String token, String path, String username, String password) {
 		User user = userRepository.findByToken(token).orElseThrow();
 		Server server = serverRepository.findByIdAndUser(serverId, user)
