@@ -101,9 +101,4 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 		sendRequestToDeleteUser(status().isNotFound(), "NotExist");
 	}
 
-	@Test
-	public void canDeleteUserAndItsServers() throws Exception {
-		authenticate(authUser1);
-	}
-
 }
