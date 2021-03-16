@@ -5,7 +5,6 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MvcResult;
 import saauan.flopbox.AbstractIntegrationTest;
@@ -21,9 +20,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class ServerIntegrationTest extends AbstractIntegrationTest {
 
-	@Autowired
-	private ServerRepository serverRepository;
-
 	private Server server1 = new Server("https://www.baeldung.com", 28);
 	private Server server2 = new Server("https://www.baeldung2.com", 29);
 
@@ -35,7 +31,6 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 	@BeforeEach
 	public void setUp() {
 		super.setUp();
-		serverRepository.deleteAll();
 		authenticate(authUser1);
 		currentAuthToken = authTokens.get(authUser1);
 		currentUser = authUser1;

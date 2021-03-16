@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MvcResult;
 import saauan.flopbox.AbstractIntegrationTest;
@@ -18,8 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class UserIntegrationTest extends AbstractIntegrationTest {
 
-	@Autowired
-	private UserRepository userRepository;
+
 	private User user1 = new User("saauan", "marshmallow");
 	private User user2 = new User("dootris", "scoob");
 
@@ -27,7 +25,6 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 	@BeforeEach
 	public void setUp() throws Exception {
 		super.setUp();
-		userRepository.deleteAll();
 	}
 
 	@Test

@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest {
 	public static final String HOST = "localhost";
 	protected static final int PORT = 6667;
-	public static Server ftpServerPOJO;
+	public Server ftpServerPOJO;
 	public String ftpUsername = "anonymous";
 	public String ftpPassword = "anonymous";
 	public String homeDirectory = "/home";

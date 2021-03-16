@@ -13,7 +13,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import saauan.flopbox.server.Server;
+import saauan.flopbox.server.ServerRepository;
 import saauan.flopbox.user.User;
+import saauan.flopbox.user.UserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,26 +31,33 @@ public class AbstractIntegrationTest {
 	protected MockMvc mockMvc;
 	protected ObjectMapper objectMapper = new ObjectMapper();
 
-	protected static Map<User, String> authTokens = new HashMap<>();
+	protected Map<User, String> authTokens = new HashMap<>();
 	protected User authUser1 = new User("Tristan", "Scooby");
 	protected User authUser2 = new User("Anthony", "Doo");
-	protected static Map<User, Boolean> isAuthenticated = new HashMap<>();
-	public static final String BEARER = "Bearer ";
-	protected final String serversUrl = "/servers";
+	protected Map<User, Boolean> isAuthenticated = new HashMap<>();
 	protected String currentAuthToken;
 	protected User currentUser;
+
+	public static final String BEARER = "Bearer ";
+	protected final String serversUrl = "/servers";
 	private final String usersUrl = "/users";
 
 	@Autowired
-	private WebApplicationContext wac;
+	protected WebApplicationContext wac;
+	@Autowired
+	protected ServerRepository serverRepository;
+	@Autowired
+	protected UserRepository userRepository;
 
 	@BeforeEach
 	public void setUp() throws Exception {
+		serverRepository.deleteAll();
+		userRepository.deleteAll();
 		mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
 	}
 
 	protected void authenticate(User user) throws Exception {
-		if(!isAuthenticated.containsKey(user)){
+		if (!isAuthenticated.containsKey(user)) {
 			sendRequestToCreateUser(status().isCreated(), user);
 			MvcResult result = sendRequestToAuthenticate(status().isOk(), user);
 			authTokens.put(user, result.getResponse().getContentAsString());

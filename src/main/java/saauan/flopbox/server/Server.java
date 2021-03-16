@@ -1,6 +1,8 @@
 package saauan.flopbox.server;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import saauan.flopbox.user.User;
 
 import javax.persistence.*;
@@ -33,6 +35,7 @@ public class Server {
 	private int port;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@EqualsAndHashCode.Include
 	private User user;
 }
