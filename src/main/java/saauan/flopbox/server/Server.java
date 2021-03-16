@@ -4,7 +4,6 @@ import lombok.*;
 import saauan.flopbox.user.User;
 
 import javax.persistence.*;
-import java.net.URL;
 
 /**
  * A FTP Server
@@ -19,15 +18,16 @@ import java.net.URL;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
+//@JsonRootName() // TODO
 public class Server {
 
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Id
 	private int id;
 
-	@NonNull
 	@EqualsAndHashCode.Include
-	private URL url;
+	@NonNull
+	private String url;
 
 	@NonNull
 	private int port;
