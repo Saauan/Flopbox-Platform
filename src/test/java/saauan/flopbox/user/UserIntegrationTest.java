@@ -4,35 +4,27 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 public class UserIntegrationTest extends AbstractIntegrationTest {
 
-	@Autowired
-	private UserRepository userRepository;
+
 	private User user1 = new User("saauan", "marshmallow");
 	private User user2 = new User("dootris", "scoob");
 
 	@Override
 	@BeforeEach
-	public void setUp() {
+	public void setUp() throws Exception {
 		super.setUp();
-		userRepository.deleteAll();
 	}
 
 	@Test
@@ -104,11 +96,6 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 	@Test
 	public void cannotDeleteUserIfItDoesNotExist() throws Exception {
 		sendRequestToDeleteUser(status().isNotFound(), "NotExist");
-	}
-
-	@Test
-	public void canDeleteUserAndItsServers() throws Exception {
-		authenticate(authUser1);
 	}
 
 }

@@ -28,16 +28,19 @@ public class ServerService {
 	 * Adds a server to the database
 	 *
 	 * @param server the server to add
+	 * @return the created server
 	 * @throws ResourceAlreadyExistException if the server already exists
 	 */
-	public void addServer(Server server, String token) {
+	public Server addServer(Server server, String token) {
 		log.info(String.format("Adding server %s", server));
 		User user = userService.findUserByToken(token).orElseThrow();
 		if (this.serverRepository.findByUserAndUrl(user, server.getUrl()) != null) {
-			Utils.logAndThrow(log, ResourceAlreadyExistException.class, String.format("Server %s already exists", server.getUrl()));
+			Utils.logAndThrow(log, ResourceAlreadyExistException.class,
+					String.format("Server %s already exists", server.getUrl()));
 		}
 		server.setUser(user);
 		serverRepository.save(server);
+		return server;
 	}
 
 	/**

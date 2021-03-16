@@ -5,40 +5,23 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
-import saauan.flopbox.user.User;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.http.RequestEntity.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @SpringBootTest
 public class ServerIntegrationTest extends AbstractIntegrationTest {
 
-	public static final String BEARER = "Bearer ";
-	@Autowired
-	private ServerRepository serverRepository;
-
-	private final String serversUrl = "/servers";
-	private Server server1 = new Server(new URL("https://www.baeldung.com"), 28);
-	private Server server2 = new Server(new URL("https://www.baeldung2.com"), 29);
-	private String authToken;
-	private User currentUser;
+	private Server server1 = new Server("https://www.baeldung.com", 28);
+	private Server server2 = new Server("https://www.baeldung2.com", 29);
 
 	public ServerIntegrationTest() throws MalformedURLException {
 	}
@@ -48,16 +31,9 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 	@BeforeEach
 	public void setUp() {
 		super.setUp();
-		serverRepository.deleteAll();
 		authenticate(authUser1);
-		authToken = authTokens.get(authUser1);
+		currentAuthToken = authTokens.get(authUser1);
 		currentUser = authUser1;
-	}
-
-	private void authAndChangeUser(User user) throws Exception {
-		authenticate(user);
-		currentUser = user;
-		authToken = authTokens.get(user);
 	}
 
 	@Test
@@ -199,51 +175,4 @@ public class ServerIntegrationTest extends AbstractIntegrationTest {
 		Assertions.assertEquals(0, serverRepository.findAll().size());
 	}
 
-	private MvcResult sendRequestToCreateServer(ResultMatcher expectedResponseCode, Server server) throws Exception {
-		String jsonBody = objectMapper.writeValueAsString(server);
-		server.setUser(currentUser);
-		return this.mockMvc.perform(MockMvcRequestBuilders.post(serversUrl)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(jsonBody)
-				.characterEncoding("utf-8")
-				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToModifyServer(ResultMatcher expectedResponseCode, int id, Server server) throws Exception {
-		String jsonBody = objectMapper.writeValueAsString(server);
-		server.setUser(currentUser);
-		return this.mockMvc.perform(MockMvcRequestBuilders.put(serversUrl + "/" + id)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(jsonBody)
-				.characterEncoding("utf-8")
-				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToGetServers(ResultMatcher expectedResponseCode) throws Exception {
-		return this.mockMvc.perform(get(serversUrl)
-				.characterEncoding("utf-8")
-				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToGetServer(ResultMatcher expectedResponseCode, int serverId) throws Exception {
-		return this.mockMvc.perform(get(serversUrl + "/" + serverId)
-				.characterEncoding("utf-8")
-				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToDeleteServer(ResultMatcher expectedResponseCode, int serverId) throws Exception {
-		return this.mockMvc.perform(delete(serversUrl + "/" + serverId)
-				.characterEncoding("utf-8")
-				.header(HttpHeaders.AUTHORIZATION, BEARER + authToken))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
 }
