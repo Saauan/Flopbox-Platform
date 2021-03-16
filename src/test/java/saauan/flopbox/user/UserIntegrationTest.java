@@ -6,18 +6,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -30,7 +25,7 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 
 	@Override
 	@BeforeEach
-	public void setUp() {
+	public void setUp() throws Exception {
 		super.setUp();
 		userRepository.deleteAll();
 	}
