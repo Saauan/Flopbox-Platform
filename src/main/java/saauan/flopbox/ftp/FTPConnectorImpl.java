@@ -1,5 +1,6 @@
 package saauan.flopbox.ftp;
 
+import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.stereotype.Component;
@@ -11,14 +12,21 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
+@CommonsLog
 public class FTPConnectorImpl implements FTPConnector {
 
 	private FTPClient connectToServer(Server server, String username, String password) throws IOException {
+		log.debug(String.format("Connecting to the FTP Server %s", server.getUrl()));
 		FTPClient ftpClient = new FTPClient();
 		ftpClient.connect(server.getUrl(), server.getPort());
+		System.err.println("Connected");
+		ftpClient.enterLocalPassiveMode();
 		if (username != null && !username.isBlank()) {
+			log.debug("Login in the server");
 			if (!ftpClient.login(username, password)) {
-				throw new FTPOperationException(String.format("Wrong user or pass for server %s", server));
+				log.debug(String.format("Wrong creds %s | %s", username, password));
+				throw new FTPOperationException(
+						String.format("Wrong user or pass for server %s : %s", server, ftpClient.getReplyString()));
 			}
 		}
 		return ftpClient;
@@ -26,9 +34,12 @@ public class FTPConnectorImpl implements FTPConnector {
 
 	@Override
 	public List<FTPFile> list(Server server, String path, String username, String password) {
+		log.info(String.format("Listing files from the FTP Server at path %s", path));
 		try {
 			FTPClient ftpClient = connectToServer(server, username, password);
-			return Arrays.asList(ftpClient.listFiles(path));
+			log.debug("Sending the list command");
+			List<FTPFile> files = Arrays.asList(ftpClient.listFiles(path));
+			return files;
 		} catch (IOException e) {
 			throw new FTPConnectException(String.format("Could not connect to %s", server), e);
 		}
@@ -36,6 +47,7 @@ public class FTPConnectorImpl implements FTPConnector {
 
 	@Override
 	public void sendFile(Server server, String path, String username, String password, MultipartFile file) {
+		log.info(String.format("Sending a file to the FTP Server at path %s", path));
 		try {
 			FTPClient ftpClient = connectToServer(server, username, password);
 			if (!ftpClient.storeFile(path, file.getInputStream())) {
