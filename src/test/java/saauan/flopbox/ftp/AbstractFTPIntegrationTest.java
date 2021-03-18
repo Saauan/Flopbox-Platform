@@ -10,10 +10,14 @@ import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.springframework.http.HttpHeaders;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
 import saauan.flopbox.server.Server;
+
+import java.util.Objects;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,6 +73,36 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 				.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
 				.header(FTPController.FTP_USERNAME, ftpUsername)
 				.header(FTPController.FTP_PASSWORD, ftpPassword))
+				.andExpect(expectedResponseCode)
+				.andReturn();
+	}
+
+	protected MvcResult uploadFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
+										   MockMultipartFile jsonFile) throws Exception {
+		return this.mockMvc.perform(
+				MockMvcRequestBuilders
+						.multipart(String.format("/servers/%s/files?path=%s", serverId, path)).file(jsonFile)
+						.contentType(
+								Objects.requireNonNull(jsonFile.getContentType()))
+						.characterEncoding("utf-8")
+						.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
+						.header(FTPController.FTP_USERNAME, ftpUsername)
+						.header(FTPController.FTP_PASSWORD, ftpPassword))
+				.andExpect(expectedResponseCode)
+				.andReturn();
+	}
+
+	protected MvcResult uploadFilesToServer(ResultMatcher expectedResponseCode, int serverId, String path,
+											MockMultipartFile jsonFile, MockMultipartFile jsonFile2) throws Exception {
+		return this.mockMvc.perform(
+				MockMvcRequestBuilders
+						.multipart(String.format("/servers/%s/files?path=%s", serverId, path))
+						.file(jsonFile).file(jsonFile2)
+						.contentType(Objects.requireNonNull(jsonFile.getContentType()))
+						.characterEncoding("utf-8")
+						.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
+						.header(FTPController.FTP_USERNAME, ftpUsername)
+						.header(FTPController.FTP_PASSWORD, ftpPassword))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
