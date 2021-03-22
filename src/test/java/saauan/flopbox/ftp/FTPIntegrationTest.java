@@ -56,17 +56,20 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
 		System.err.println(result.getResponse().getContentAsString());
 	}
-	//
-	//	@Test
-	//	public void canSendMultipleFiles() throws Exception {
-	//		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(), "{\"key1\": \"value1\"}".getBytes());
-	//		MockMultipartFile jsonFile = new MockMultipartFile("file", "test2.json", MediaType.APPLICATION_JSON.toString(), "{\"key2\": \"value2\"}".getBytes());
-	//
-	//		MvcResult result = uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile, jsonFile2);
-	//		assert fakeFtpServer.getFileSystem().isFile("/home/text.txt");
-	//		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
-	//		System.err.println(result.getResponse().getContentAsString());
-	//	}
+
+	@Test
+	public void canSendMultipleFiles() throws Exception {
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				"{\"key1\": \"value1\"}".getBytes());
+		MockMultipartFile jsonFile2 = new MockMultipartFile("file", "test2.json", MediaType.APPLICATION_JSON.toString(),
+				"{\"key2\": \"value2\"}".getBytes());
+
+		MvcResult result = uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json",
+				"/home/test2.json", jsonFile, jsonFile2);
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test2.json"));
+		System.err.println(result.getResponse().getContentAsString());
+	}
 
 	@Test
 	public void cannotSendFileToUnknownPath() throws Exception {

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 @RestController()
-@RequestMapping("/servers/{serverId}/files")
+@RequestMapping("/servers/{serverId}/")
 public class FTPController {
 
 	public static final String FTP_USERNAME = "FTP-Username";
@@ -33,7 +33,7 @@ public class FTPController {
 				"files");
 	}
 
-	@GetMapping()
+	@GetMapping("/files")
 	public ResponseEntity<Resource> downloadFile(@PathVariable int serverId, @RequestParam String path,
 												 @RequestHeader HttpHeaders headers) {
 		Resource resource = ftpService.loadAsResource(serverId,
@@ -47,7 +47,6 @@ public class FTPController {
 				.body(resource);
 	}
 
-	@PostMapping()
 	public void uploadFile(@RequestParam("file") MultipartFile file, @PathVariable int serverId,
 						   @RequestParam String path,
 						   @RequestHeader HttpHeaders headers) {
@@ -59,9 +58,15 @@ public class FTPController {
 				file);
 	}
 
-	public void uploadMultipleFiles(@RequestParam("files") MultipartFile[] files, @PathVariable int serverId,
-									@RequestParam String path,
+	@PostMapping("/files")
+	public void uploadMultipleFiles(@RequestParam("file") MultipartFile[] files, @PathVariable int serverId,
+									@RequestParam String[] path,
 									@RequestHeader HttpHeaders headers) {
-		Arrays.stream(files).forEach(file -> uploadFile(file, serverId, path, headers));
+		if (path.length != files.length) {
+			throw new IllegalArgumentException("There must be as many paths as files");
+		}
+		for (int i = 0; i < files.length; i++) {
+			uploadFile(files[i], serverId, path[i], headers);
+		}
 	}
 }

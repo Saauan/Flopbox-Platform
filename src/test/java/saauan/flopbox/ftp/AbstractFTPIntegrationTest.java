@@ -68,7 +68,7 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 
 	protected MvcResult sendRequestToList(ResultMatcher expectedResponseCode, int serverId, String path)
 			throws Exception {
-		return this.mockMvc.perform(get(String.format("/servers/%s/files/list?path=%s", serverId, path))
+		return this.mockMvc.perform(get(String.format("/servers/%s/list?path=%s", serverId, path))
 				.characterEncoding("utf-8")
 				.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
 				.header(FTPController.FTP_USERNAME, ftpUsername)
@@ -92,11 +92,12 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 				.andReturn();
 	}
 
-	protected MvcResult uploadFilesToServer(ResultMatcher expectedResponseCode, int serverId, String path,
+	protected MvcResult uploadFilesToServer(ResultMatcher expectedResponseCode, int serverId, String path1,
+											String path2,
 											MockMultipartFile jsonFile, MockMultipartFile jsonFile2) throws Exception {
 		return this.mockMvc.perform(
 				MockMvcRequestBuilders
-						.multipart(String.format("/servers/%s/files?path=%s", serverId, path))
+						.multipart(String.format("/servers/%s/files?path=%s&path=%s", serverId, path1, path2))
 						.file(jsonFile).file(jsonFile2)
 						.contentType(Objects.requireNonNull(jsonFile.getContentType()))
 						.characterEncoding("utf-8")
