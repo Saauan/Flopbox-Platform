@@ -4,36 +4,27 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 public class UserIntegrationTest extends AbstractIntegrationTest {
 
-	@Autowired
-	private UserRepository userRepository;
-	private final String usersUrl = "/users";
+
 	private User user1 = new User("saauan", "marshmallow");
 	private User user2 = new User("dootris", "scoob");
 
 	@Override
 	@BeforeEach
-	public void setUp() {
+	public void setUp() throws Exception {
 		super.setUp();
-		userRepository.deleteAll();
 	}
 
 	@Test
@@ -107,34 +98,4 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 		sendRequestToDeleteUser(status().isNotFound(), "NotExist");
 	}
 
-	private MvcResult sendRequestToCreateUser(ResultMatcher expectedResponseCode, User user) throws Exception {
-		String jsonBody = objectMapper.writeValueAsString(user);
-		return this.mockMvc.perform(MockMvcRequestBuilders.post(usersUrl)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(jsonBody)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToGetUsers(ResultMatcher expectedResponseCode) throws Exception {
-		return this.mockMvc.perform(get(usersUrl)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToGetUser(ResultMatcher expectedResponseCode, String username) throws Exception {
-		return this.mockMvc.perform(get(usersUrl + "/" + username)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
-
-	private MvcResult sendRequestToDeleteUser(ResultMatcher expectedResponseCode, String username) throws Exception {
-		return this.mockMvc.perform(delete(usersUrl + "/" + username)
-				.characterEncoding("utf-8"))
-				.andExpect(expectedResponseCode)
-				.andReturn();
-	}
 }

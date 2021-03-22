@@ -1,15 +1,15 @@
 package saauan.flopbox.server;
 
-import lombok.extern.apachecommons.CommonsLog;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import saauan.flopbox.Utils;
 import saauan.flopbox.exceptions.ResourceAlreadyExistException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController()
 @RequestMapping("servers")
@@ -28,9 +28,8 @@ public class ServerController {
 	 * @return Returns a list of all the servers
 	 */
 	@GetMapping
-	public List<Server> getAllServers(@RequestHeader HttpHeaders headers){
-		System.err.println(StringUtils.removeStart(headers.get(HttpHeaders.AUTHORIZATION).get(0), "Bearer").trim());
-		return serverService.getAllServers();
+	public List<Server> getAllServers(@RequestHeader HttpHeaders headers) {
+		return serverService.getAllServers(Utils.getToken(headers));
 	}
 
 	/**
@@ -40,9 +39,11 @@ public class ServerController {
 	 */
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
-	public void addServer(@RequestBody Server server) {
+	public Map<String, Object> addServer(@RequestBody Server server,
+										 @RequestHeader HttpHeaders headers) {
 		try {
-			serverService.addServer(server);
+			return Utils.mapify(serverService.addServer(server, Utils.getToken(headers)), "server");
+			// TODO: test
 		} catch (ResourceAlreadyExistException e) {
 			throw new ResponseStatusException(
 					HttpStatus.FORBIDDEN, e.getMessage(), e);
@@ -50,18 +51,22 @@ public class ServerController {
 	}
 
 	@GetMapping("/{serverId}")
-	public Server getServer(@PathVariable int serverId) {
-		return serverService.getServer(serverId);
+	public Server getServer(@PathVariable int serverId,
+							@RequestHeader HttpHeaders headers) {
+		return serverService.getServer(serverId, Utils.getToken(headers));
 	}
 
-	@PatchMapping("/{serverId}")
-	public void modifyServer(@RequestBody Server server, @PathVariable int serverId){
-		serverService.modifyServer(server, serverId);
+	@PutMapping("/{serverId}")
+	public void modifyServer(@RequestBody Server server,
+							 @PathVariable int serverId,
+							 @RequestHeader HttpHeaders headers) {
+		serverService.modifyServer(server, serverId, Utils.getToken(headers));
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{serverId}")
-	public void deleteServer(@PathVariable int serverId) {
-		serverService.deleteServer(serverId);
+	public void deleteServer(@PathVariable int serverId,
+							 @RequestHeader HttpHeaders headers) {
+		serverService.deleteServer(serverId, Utils.getToken(headers));
 	}
 }

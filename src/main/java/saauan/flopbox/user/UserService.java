@@ -105,4 +105,13 @@ public class UserService {
 		}
 		return Optional.empty();
 	}
+
+	public Optional<User> findUserByToken(String token) {
+		Optional<org.springframework.security.core.userdetails.User> springUser = findByToken(token);
+		if(springUser.isPresent()) {
+			 return userRepository.findByUsernameAndPassword(springUser.get().getUsername(), springUser.get().getPassword());
+		} else {
+			return Optional.empty();
+		}
+	}
 }
