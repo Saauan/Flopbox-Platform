@@ -41,6 +41,12 @@ public class FTPConnectorImpl implements FTPConnector {
 	}
 
 	@Override
+	public void deleteFile(Server server, String path, String username, String password) {
+		log.info(String.format("Deleting file %s", path));
+		sendSimpleCommand(server, username, password, (FTPClient ftpClient) -> ftpClient.deleteFile(path));
+	}
+
+	@Override
 	public void createDirectory(Server server, String path, String username, String password) {
 		log.info(String.format("Creating new directory with path %s", path));
 		sendSimpleCommand(server, username, password, (FTPClient ftpClient) -> ftpClient.makeDirectory(path));

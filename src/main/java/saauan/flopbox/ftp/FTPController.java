@@ -86,6 +86,18 @@ public class FTPController {
 				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 
+	@DeleteMapping(FILES)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteFile(@PathVariable int serverId,
+						   @RequestParam String path,
+						   @RequestHeader HttpHeaders headers) {
+		ftpService.deleteFile(serverId,
+				Utils.getToken(headers),
+				path,
+				Utils.getHeaderValue(headers, FTP_USERNAME),
+				Utils.getHeaderValue(headers, FTP_PASSWORD));
+	}
+
 	@PostMapping(DIRECTORIES)
 	public void createDirectory(@PathVariable int serverId,
 								@RequestParam String path,
