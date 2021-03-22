@@ -76,4 +76,34 @@ public class FTPConnectorImpl implements FTPConnector {
 		}
 	}
 
+	@Override
+	public void deleteDirectory(Server server, String path, String username, String password) {
+		log.info(String.format("Deleting directory with path %s", path));
+		try {
+			FTPClient ftpClient = connectToServer(server, username, password);
+			if (!ftpClient.removeDirectory(path)) {
+				throw new FTPOperationException(
+						String.format("There was an error during the delete directory : %s",
+								ftpClient.getReplyString()));
+			}
+		} catch (IOException e) {
+			throw new FTPConnectException(String.format("Could not connect to %s", server), e);
+		}
+	}
+
+	@Override
+	public void renameDirectory(Server server, String path, String to, String username, String password) {
+		log.info(String.format("Deleting directory with path %s", path));
+		try {
+			FTPClient ftpClient = connectToServer(server, username, password);
+			if (!ftpClient.rename(path, to)) {
+				throw new FTPOperationException(
+						String.format("There was an error during the delete directory : %s",
+								ftpClient.getReplyString()));
+			}
+		} catch (IOException e) {
+			throw new FTPConnectException(String.format("Could not connect to %s", server), e);
+		}
+	}
+
 }

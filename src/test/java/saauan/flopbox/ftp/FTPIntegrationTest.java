@@ -82,14 +82,56 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	public void canCreateDirectory() throws Exception {
 		sendRequestToCreateDirectory(status().isOk(), ftpServerPOJO.getId(), "/home/myDir");
 
-		fakeFtpServer.getFileSystem().isDirectory("/home/myDir");
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home/myDir"));
 	}
 
 	@Test
 	public void cannotCreateDirectoryIfPathIncorrect() throws Exception {
 		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/data/yo");
 		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home/myDir/bloup");
+	}
 
+	@Test
+	public void canDeleteDirectoryIfEmpty() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+		sendRequestToDeleteDirectory(status().isNoContent(), ftpServerPOJO.getId(), "/dev");
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+	}
+
+	@Test
+	public void cannotDeleteDirectoryIfNotEmpty() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+		sendRequestToDeleteDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home");
+
+	}
+
+	@Test
+	public void canNotDeleteDirectoryIfPathWrong() throws Exception {
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/home/blob"));
+		sendRequestToDeleteDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home/blob");
+	}
+
+	@Test
+	public void canRenameDirectory() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+		sendRequestToRenameDirectory(status().isOk(), ftpServerPOJO.getId(), "/home", "/newHome");
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/newHome"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/newHome/text.txt"));
+	}
+
+	@Test
+	public void cannotRenameDirectoryToAlreadyExistingOne() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+		sendRequestToRenameDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home", "/dev");
+	}
+
+	@Test
+	public void cannotRenameDirectoryIfPathIsWrong() throws Exception {
+		sendRequestToRenameDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/homeBad", "/newHome");
 	}
 
 	@Test
