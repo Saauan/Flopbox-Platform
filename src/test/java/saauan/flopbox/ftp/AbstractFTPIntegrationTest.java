@@ -13,14 +13,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import saauan.flopbox.AbstractIntegrationTest;
 import saauan.flopbox.server.Server;
 
 import java.util.Objects;
 
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest {
@@ -69,50 +69,53 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 
 	protected MvcResult sendRequestToList(ResultMatcher expectedResponseCode, int serverId, String path)
 			throws Exception {
-		return this.mockMvc.perform(get(String.format("/servers/%s/list?path=%s", serverId, path))
-				.characterEncoding("utf-8")
-				.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
-				.header(FTPController.FTP_USERNAME, ftpUsername)
-				.header(FTPController.FTP_PASSWORD, ftpPassword))
-				.andExpect(expectedResponseCode)
-				.andReturn();
+		return sendRequestToFlopBox(expectedResponseCode,
+				get(String.format("/servers/%s/list?path=%s", serverId, path)));
+
 	}
 
 	protected MvcResult uploadFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
 										   MockMultipartFile jsonFile) throws Exception {
-		return this.mockMvc.perform(
-				MockMvcRequestBuilders
-						.multipart(String.format("/servers/%s/files?path=%s", serverId, path)).file(jsonFile)
-						.contentType(
-								Objects.requireNonNull(jsonFile.getContentType()))
-						.characterEncoding("utf-8")
-						.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
-						.header(FTPController.FTP_USERNAME, ftpUsername)
-						.header(FTPController.FTP_PASSWORD, ftpPassword))
-				.andExpect(expectedResponseCode)
-				.andReturn();
+		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
+				.multipart(String.format("/servers/%s/files?path=%s", serverId, path))
+				.file(jsonFile)
+				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
 	}
 
 	protected MvcResult uploadFilesToServer(ResultMatcher expectedResponseCode, int serverId, String path1,
 											String path2,
 											MockMultipartFile jsonFile, MockMultipartFile jsonFile2) throws Exception {
-		return this.mockMvc.perform(
-				MockMvcRequestBuilders
-						.multipart(String.format("/servers/%s/files?path=%s&path=%s", serverId, path1, path2))
-						.file(jsonFile).file(jsonFile2)
-						.contentType(Objects.requireNonNull(jsonFile.getContentType()))
-						.characterEncoding("utf-8")
-						.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
-						.header(FTPController.FTP_USERNAME, ftpUsername)
-						.header(FTPController.FTP_PASSWORD, ftpPassword))
-				.andExpect(expectedResponseCode)
-				.andReturn();
+		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
+				.multipart(String.format("/servers/%s/files?path=%s&path=%s", serverId, path1, path2))
+				.file(jsonFile).file(jsonFile2)
+				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
+
 	}
 
-	protected MvcResult sendRequestToCreateDirectory(ResultMatcher expectedResponseCode, int serverId, String path)
+	protected void sendRequestToCreateDirectory(ResultMatcher expectedResponseCode, int serverId, String path)
 			throws Exception {
-		return this.mockMvc.perform(post(String.format("/servers/%s/directories?path=%s", serverId, path))
-				.characterEncoding("utf-8")
+		sendRequestToFlopBox(expectedResponseCode,
+				post(String.format("/servers/%s/directories?path=%s", serverId, path)));
+
+	}
+
+	protected void sendRequestToDeleteDirectory(ResultMatcher expectedResponseCode, int serverId, String path)
+			throws Exception {
+		sendRequestToFlopBox(expectedResponseCode,
+				delete(String.format("/servers/%s/directories?path=%s", serverId, path)));
+	}
+
+	protected void sendRequestToRenameDirectory(ResultMatcher expectedResponseCode, int serverId, String path,
+												String to)
+			throws Exception {
+		sendRequestToFlopBox(expectedResponseCode,
+				patch(String.format("/servers/%s/directories?path=%s&to=%s", serverId, path, to)));
+	}
+
+	protected MvcResult sendRequestToFlopBox(ResultMatcher expectedResponseCode,
+											 MockHttpServletRequestBuilder operation)
+			throws Exception {
+		return this.mockMvc.perform(operation.characterEncoding("utf-8")
 				.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
 				.header(FTPController.FTP_USERNAME, ftpUsername)
 				.header(FTPController.FTP_PASSWORD, ftpPassword))
