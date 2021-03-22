@@ -61,4 +61,16 @@ public interface FTPConnector {
 	 * @throws FTPOperationException if there is an error during the operation
 	 */
 	void deleteDirectory(Server server, String path, String username, String password);
+
+	/**
+	 * Renames a directory
+	 *
+	 * @param server   the server to connect to
+	 * @param path     the path of the directory
+	 * @param username the username of the user
+	 * @param password the password of the user
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error during the operation
+	 */
+	void renameDirectory(Server server, String path, String to, String username, String password);
 }

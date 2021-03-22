@@ -95,4 +95,17 @@ public class FTPController {
 				Utils.getHeaderValue(headers, FTP_USERNAME),
 				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
+
+	@PatchMapping(DIRECTORIES)
+	public void renameDirectory(@PathVariable int serverId,
+								@RequestParam String path,
+								@RequestParam String to,
+								@RequestHeader HttpHeaders headers) {
+		ftpService.renameDirectory(serverId,
+				Utils.getToken(headers),
+				path,
+				to,
+				Utils.getHeaderValue(headers, FTP_USERNAME),
+				Utils.getHeaderValue(headers, FTP_PASSWORD));
+	}
 }
