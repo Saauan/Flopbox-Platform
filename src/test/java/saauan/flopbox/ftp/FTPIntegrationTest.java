@@ -89,14 +89,21 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	public void cannotCreateDirectoryIfPathIncorrect() throws Exception {
 		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/data/yo");
 		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home/myDir/bloup");
-
 	}
 
 	@Test
-	public void canDeleteDirectory() throws Exception {
+	public void canDeleteDirectoryIfEmpty() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+		sendRequestToDeleteDirectory(status().isNoContent(), ftpServerPOJO.getId(), "/dev");
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+	}
+
+	@Test
+	public void cannotDeleteDirectoryIfNotEmpty() throws Exception {
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
-		sendRequestToDeleteDirectory(status().isNoContent(), ftpServerPOJO.getId(), "/home");
-		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+		sendRequestToDeleteDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home");
+
 	}
 
 	@Test

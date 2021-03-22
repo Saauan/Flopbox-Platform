@@ -90,4 +90,23 @@ public class FTPService {
 						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
 		ftpConnector.createDirectory(server, path, username, password);
 	}
+
+	/**
+	 * Deletes a directory
+	 *
+	 * @param serverId the id of the server
+	 * @param token    the authentication token of the user
+	 * @param path     the path of the directory
+	 * @param username the FTP username of the user
+	 * @param password the FTP password of the user
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error while performing the operation on the server
+	 */
+	public void deleteDirectory(int serverId, String token, String path, String username, String password) {
+		User user = userRepository.findByToken(token).orElseThrow();
+		Server server = serverRepository.findByIdAndUser(serverId, user)
+				.orElseThrow(
+						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		ftpConnector.deleteDirectory(server, path, username, password);
+	}
 }

@@ -42,11 +42,23 @@ public interface FTPConnector {
 	 * Creates a new directory on the server
 	 *
 	 * @param server   the server to connect to
-	 * @param path     the path where the file will be stored
+	 * @param path     the path of the directory to create
 	 * @param username the username of the user
 	 * @param password the password of the user
 	 * @throws FTPConnectException   if there is an error while connecting to the server
 	 * @throws FTPOperationException if there is an error during the operation
 	 */
 	void createDirectory(Server server, String path, String username, String password);
+
+	/**
+	 * Deletes a directory on the server
+	 *
+	 * @param server   the server to connect to
+	 * @param path     the path of the directory to delete
+	 * @param username the username of the user
+	 * @param password the password of the user
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error during the operation
+	 */
+	void deleteDirectory(Server server, String path, String username, String password);
 }
