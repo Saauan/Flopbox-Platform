@@ -39,6 +39,31 @@ public interface FTPConnector {
 	void getFile(Server server, String path, String username, String password);
 
 	/**
+	 * Renames a file
+	 *
+	 * @param server   the server to connect to
+	 * @param path     the path of the file
+	 * @param to       the new path of the file
+	 * @param username the username of the user
+	 * @param password the password of the user
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error during the operation
+	 */
+	void renameFile(Server server, String path, String to, String username, String password);
+
+	/**
+	 * Deletes a file
+	 *
+	 * @param server   the server to connect to
+	 * @param path     the path of the file
+	 * @param username the username of the user
+	 * @param password the password of the user
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error during the operation
+	 */
+	void deleteFile(Server server, String path, String username, String password);
+
+	/**
 	 * Creates a new directory on the server
 	 *
 	 * @param server   the server to connect to
@@ -67,6 +92,7 @@ public interface FTPConnector {
 	 *
 	 * @param server   the server to connect to
 	 * @param path     the path of the directory
+	 * @param to        the new path of the directory
 	 * @param username the username of the user
 	 * @param password the password of the user
 	 * @throws FTPConnectException   if there is an error while connecting to the server
