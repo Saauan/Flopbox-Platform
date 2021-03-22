@@ -61,7 +61,7 @@ public class FTPController {
 				file);
 	}
 
-	@PostMapping("/files")
+	@PostMapping(FILES)
 	public void uploadMultipleFiles(@RequestParam("file") MultipartFile[] files, @PathVariable int serverId,
 									@RequestParam String[] path,
 									@RequestHeader HttpHeaders headers) {
@@ -71,6 +71,19 @@ public class FTPController {
 		for (int i = 0; i < files.length; i++) {
 			uploadFile(files[i], serverId, path[i], headers);
 		}
+	}
+
+	@PatchMapping(FILES)
+	public void renameFile(@PathVariable int serverId,
+						   @RequestParam String path,
+						   @RequestParam String to,
+						   @RequestHeader HttpHeaders headers) {
+		ftpService.renameFile(serverId,
+				Utils.getToken(headers),
+				path,
+				to,
+				Utils.getHeaderValue(headers, FTP_USERNAME),
+				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 
 	@PostMapping(DIRECTORIES)

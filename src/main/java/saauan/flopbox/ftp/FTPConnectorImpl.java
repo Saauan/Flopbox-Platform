@@ -35,10 +35,15 @@ public class FTPConnectorImpl implements FTPConnector {
 	}
 
 	@Override
+	public void renameFile(Server server, String path, String to, String username, String password) {
+		log.info(String.format("Renaming file from %s to %s", path, to));
+		renameResource(server, path, to, username, password);
+	}
+
+	@Override
 	public void createDirectory(Server server, String path, String username, String password) {
 		log.info(String.format("Creating new directory with path %s", path));
 		sendSimpleCommand(server, username, password, (FTPClient ftpClient) -> ftpClient.makeDirectory(path));
-
 	}
 
 	@Override
@@ -50,6 +55,10 @@ public class FTPConnectorImpl implements FTPConnector {
 	@Override
 	public void renameDirectory(Server server, String path, String to, String username, String password) {
 		log.info(String.format("Renaming directory with path %s to %s", path, to));
+		renameResource(server, path, to, username, password);
+	}
+
+	private void renameResource(Server server, String path, String to, String username, String password) {
 		sendSimpleCommand(server, username, password, (FTPClient ftpClient) -> ftpClient.rename(path, to));
 	}
 

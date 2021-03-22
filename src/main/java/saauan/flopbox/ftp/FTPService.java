@@ -73,6 +73,26 @@ public class FTPService {
 	}
 
 	/**
+	 * Rename a file
+	 *
+	 * @param serverId the id of the server
+	 * @param token    the authentication token of the user
+	 * @param path     the path of the file
+	 * @param to       the path to rename to
+	 * @param username the FTP username of the user
+	 * @param password the FTP password of the user
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error while performing the operation on the server
+	 */
+	public void renameFile(int serverId, String token, String path, String to, String username, String password) {
+		User user = userRepository.findByToken(token).orElseThrow();
+		Server server = serverRepository.findByIdAndUser(serverId, user)
+				.orElseThrow(
+						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		ftpConnector.renameFile(server, path, to, username, password);
+	}
+
+	/**
 	 * Creates a new directory on the server
 	 *
 	 * @param serverId the id of the server
