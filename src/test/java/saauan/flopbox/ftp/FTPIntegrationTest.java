@@ -79,6 +79,20 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	}
 
 	@Test
+	public void canCreateDirectory() throws Exception {
+		sendRequestToCreateDirectory(status().isOk(), ftpServerPOJO.getId(), "/home/myDir");
+
+		fakeFtpServer.getFileSystem().isDirectory("/home/myDir");
+	}
+
+	@Test
+	public void cannotCreateDirectoryIfPathIncorrect() throws Exception {
+		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/data/yo");
+		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home/myDir/bloup");
+
+	}
+
+	@Test
 	public void downloadFileDownloadsAFileFromTheFtpServer() throws Exception {
 		Assertions.fail();
 	}

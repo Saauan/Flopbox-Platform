@@ -62,4 +62,18 @@ public class FTPConnectorImpl implements FTPConnector {
 
 	}
 
+	@Override
+	public void createDirectory(Server server, String path, String username, String password) {
+		log.info(String.format("Creating new directory with path %s", path));
+		try {
+			FTPClient ftpClient = connectToServer(server, username, password);
+			if (!ftpClient.makeDirectory(path)) {
+				throw new FTPOperationException(
+						String.format("There was an error during the make directory : %s", ftpClient.getReplyString()));
+			}
+		} catch (IOException e) {
+			throw new FTPConnectException(String.format("Could not connect to %s", server), e);
+		}
+	}
+
 }

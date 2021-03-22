@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import saauan.flopbox.Utils;
 
-import java.util.Arrays;
 import java.util.Map;
 
 @RestController()
@@ -68,5 +67,16 @@ public class FTPController {
 		for (int i = 0; i < files.length; i++) {
 			uploadFile(files[i], serverId, path[i], headers);
 		}
+	}
+
+	@PostMapping("/directories")
+	public void createDirectory(@PathVariable int serverId,
+								@RequestParam String path,
+								@RequestHeader HttpHeaders headers) {
+		ftpService.createDirectory(serverId,
+				Utils.getToken(headers),
+				path,
+				Utils.getHeaderValue(headers, FTP_USERNAME),
+				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 }

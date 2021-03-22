@@ -37,4 +37,16 @@ public interface FTPConnector {
 	void sendFile(Server server, String path, String username, String password, MultipartFile file);
 
 	void getFile(Server server, String path, String username, String password);
+
+	/**
+	 * Creates a new directory on the server
+	 *
+	 * @param server   the server to connect to
+	 * @param path     the path where the file will be stored
+	 * @param username the username of the user
+	 * @param password the password of the user
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error during the operation
+	 */
+	void createDirectory(Server server, String path, String username, String password);
 }

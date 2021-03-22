@@ -20,6 +20,7 @@ import saauan.flopbox.server.Server;
 import java.util.Objects;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest {
@@ -104,6 +105,17 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 						.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
 						.header(FTPController.FTP_USERNAME, ftpUsername)
 						.header(FTPController.FTP_PASSWORD, ftpPassword))
+				.andExpect(expectedResponseCode)
+				.andReturn();
+	}
+
+	protected MvcResult sendRequestToCreateDirectory(ResultMatcher expectedResponseCode, int serverId, String path)
+			throws Exception {
+		return this.mockMvc.perform(post(String.format("/servers/%s/directories?path=%s", serverId, path))
+				.characterEncoding("utf-8")
+				.header(HttpHeaders.AUTHORIZATION, BEARER + currentAuthToken)
+				.header(FTPController.FTP_USERNAME, ftpUsername)
+				.header(FTPController.FTP_PASSWORD, ftpPassword))
 				.andExpect(expectedResponseCode)
 				.andReturn();
 	}
