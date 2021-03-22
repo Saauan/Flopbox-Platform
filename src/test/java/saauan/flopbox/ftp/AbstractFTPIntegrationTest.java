@@ -89,7 +89,19 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 				.multipart(String.format("/servers/%s/files?path=%s&path=%s", serverId, path1, path2))
 				.file(jsonFile).file(jsonFile2)
 				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
+	}
 
+	protected void sendRequestToRenameFile(ResultMatcher expectedResponseCode, int serverId, String path,
+										   String to)
+			throws Exception {
+		sendRequestToFlopBox(expectedResponseCode,
+				patch(String.format("/servers/%s/files?path=%s&to=%s", serverId, path, to)));
+	}
+
+	protected void sendRequestToDeleteFile(ResultMatcher expectedResponseCode, int serverId, String path)
+			throws Exception {
+		sendRequestToFlopBox(expectedResponseCode,
+				delete(String.format("/servers/%s/files?path=%s&", serverId, path)));
 	}
 
 	protected void sendRequestToCreateDirectory(ResultMatcher expectedResponseCode, int serverId, String path)

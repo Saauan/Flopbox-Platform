@@ -135,6 +135,52 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	}
 
 	@Test
+	public void canRenameFile() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isFile("/dev/text.json"));
+
+		sendRequestToRenameFile(status().isOk(), ftpServerPOJO.getId(), "/home/text.txt", "/dev/text.json");
+
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/dev/text.json"));
+	}
+
+	@Test
+	public void cannotRenameFileIfFileDoesNotExist() throws Exception {
+		sendRequestToRenameFile(status().isForbidden(), ftpServerPOJO.getId(), "/blip/text.txt", "/dev/text.json");
+	}
+
+	@Test
+	public void cannotRenameFileIfNameConflicts() throws Exception {
+		sendRequestToRenameFile(status().isForbidden(), ftpServerPOJO.getId(), "/home/text.txt", "/home/run.exe");
+	}
+
+	@Test
+	public void cannotRenameFileIfRenamedFileIsInANonExistentDirectory() throws Exception {
+		sendRequestToRenameFile(status().isForbidden(), ftpServerPOJO.getId(), "/home/text.txt", "/blip/text.json");
+	}
+
+	@Test
+	public void canDeleteFile() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
+		sendRequestToDeleteFile(status().isNoContent(), ftpServerPOJO.getId(), "/home/text.txt");
+
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+	}
+
+	@Test
+	public void cannotDeleteFileIfPathIsWrong() throws Exception {
+		sendRequestToDeleteFile(status().isForbidden(), ftpServerPOJO.getId(), "/blip/text.txt");
+	}
+
+	@Test
+	public void cannotDeleteFileIfFileIsDirectory() throws Exception {
+		sendRequestToDeleteFile(status().isForbidden(), ftpServerPOJO.getId(), "/home");
+	}
+
+
+	@Test
 	public void downloadFileDownloadsAFileFromTheFtpServer() throws Exception {
 		Assertions.fail();
 	}
