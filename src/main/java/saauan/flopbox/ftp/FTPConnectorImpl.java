@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import saauan.flopbox.server.Server;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,8 +31,10 @@ public class FTPConnectorImpl implements FTPConnector {
 	}
 
 	@Override
-	public void getFile(Server server, String path, String username, String password) {
-
+	public void getFile(Server server, String path, String username, String password, OutputStream out) {
+		log.info(String.format("Download file %s", path));
+		sendSimpleCommand(server, username, password,
+				(FTPClient ftpClient) -> ftpClient.retrieveFile(path, out));
 	}
 
 	@Override
