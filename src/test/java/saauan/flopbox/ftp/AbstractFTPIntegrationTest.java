@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest {
 	public static final String HOST = "localhost";
 	protected static final int PORT = 6667;
+	public static final String TEST_TEXT_FILE_CONTENT = "abcdef 1234567890";
 	public Server ftpServerPOJO;
 	public String ftpUsername = "anonymous";
 	public String ftpPassword = "anonymous";
@@ -58,7 +59,7 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 
 		fileSystem = new UnixFakeFileSystem();
 		fileSystem.add(new DirectoryEntry("/home"));
-		fileSystem.add(new FileEntry("/home/text.txt", "abcdef 1234567890"));
+		fileSystem.add(new FileEntry("/home/text.txt", TEST_TEXT_FILE_CONTENT));
 		fileSystem.add(new FileEntry("/home/run.exe"));
 		fileSystem.add(new DirectoryEntry("/dev"));
 		fakeFtpServer.setFileSystem(fileSystem);
@@ -71,7 +72,17 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 			throws Exception {
 		return sendRequestToFlopBox(expectedResponseCode,
 				get(String.format("/servers/%s/list?path=%s", serverId, path)));
+	}
 
+	protected MvcResult downloadFile(ResultMatcher expectedResponseCode, int serverId, String path) throws Exception {
+		return sendRequestToFlopBox(expectedResponseCode,
+				MockMvcRequestBuilders.get(String.format("/servers/%s/files?path=%s", serverId, path)));
+	}
+
+	protected MvcResult downloadBinaryFile(ResultMatcher expectedResponseCode, int serverId, String path)
+			throws Exception {
+		return sendRequestToFlopBox(expectedResponseCode,
+				MockMvcRequestBuilders.get(String.format("/servers/%s/files?path=%s&binary=true", serverId, path)));
 	}
 
 	protected MvcResult uploadFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
@@ -87,6 +98,25 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 											MockMultipartFile jsonFile, MockMultipartFile jsonFile2) throws Exception {
 		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
 				.multipart(String.format("/servers/%s/files?path=%s&path=%s", serverId, path1, path2))
+				.file(jsonFile).file(jsonFile2)
+				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
+	}
+
+	protected MvcResult uploadBinaryFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
+												 MockMultipartFile jsonFile) throws Exception {
+		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
+				.multipart(String.format("/servers/%s/files?path=%s&binary=true", serverId, path))
+				.file(jsonFile)
+				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
+	}
+
+	protected MvcResult uploadBinaryFilesToServer(ResultMatcher expectedResponseCode, int serverId, String path1,
+												  String path2,
+												  MockMultipartFile jsonFile, MockMultipartFile jsonFile2)
+			throws Exception {
+		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
+				.multipart(String.format("/servers/%s/files?path=%s&path=%s&binary=true&binary=false", serverId, path1,
+						path2))
 				.file(jsonFile).file(jsonFile2)
 				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
 	}

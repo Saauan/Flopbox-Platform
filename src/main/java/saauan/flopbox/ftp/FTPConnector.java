@@ -4,6 +4,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.web.multipart.MultipartFile;
 import saauan.flopbox.server.Server;
 
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -36,7 +37,7 @@ public interface FTPConnector {
 	 */
 	void sendFile(Server server, String path, String username, String password, MultipartFile file);
 
-	void getFile(Server server, String path, String username, String password);
+	void getFile(Server server, String path, String username, String password, OutputStream out);
 
 	/**
 	 * Renames a file

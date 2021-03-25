@@ -1,7 +1,10 @@
 package saauan.flopbox.ftp;
 
+import lombok.SneakyThrows;
+import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -11,9 +14,15 @@ import saauan.flopbox.server.ServerRepository;
 import saauan.flopbox.user.User;
 import saauan.flopbox.user.UserRepository;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 @Service
+@CommonsLog
 public class FTPService {
 
 	private final ServerRepository serverRepository;
@@ -68,8 +77,27 @@ public class FTPService {
 		ftpConnector.sendFile(server, path, username, password, file);
 	}
 
-	public Resource loadAsResource(int serverId, String token, String path, String headerValue, String headerValue1) {
-		return null;
+	@SneakyThrows
+	public Resource downloadFile(int serverId, String token, String path, String username, String password) {
+		User user = userRepository.findByToken(token).orElseThrow();
+		Server server = serverRepository.findByIdAndUser(serverId, user)
+				.orElseThrow(
+						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		String tmpdir = System.getProperty("java.io.tmpdir");
+		String fileName = Path.of(path).getFileName().toString();
+		log.debug(String.format("Creating file %s", tmpdir + "/" + fileName));
+		var file = new File(tmpdir + "/" + fileName);
+		try {
+			if (!file.exists() && !file.createNewFile()) {
+				throw new RuntimeException("There was an error when creating the temporary file");
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("There was an error when creating the temporary file :", e);
+		}
+		OutputStream out = new FileOutputStream(file);
+		ftpConnector.getFile(server, path, username, password, out);
+		out.close();
+		return new FileSystemResource(file);
 	}
 
 	/**
