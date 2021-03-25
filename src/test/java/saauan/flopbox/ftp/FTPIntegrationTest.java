@@ -37,10 +37,11 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	@Test
 	public void listReturnsACorrectListOfFiles() throws Exception {
 		MvcResult result = sendRequestToList(status().isOk(), ftpServerPOJO.getId(), "/home");
+
 		System.out.println(result.getResponse().getContentAsString());
 		List<CustomFTPFile> files = objectMapper
 				.readValue(objectMapper.readTree(result.getResponse().getContentAsString()).get("files").toString(),
-						new TypeReference<List<CustomFTPFile>>() {
+						new TypeReference<>() {
 						});
 		System.err.println(files.get(0).toFormattedString());
 		Assertions.assertFalse(files.isEmpty());
@@ -51,10 +52,11 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	public void sendFileStoresItOnTheFTPServer() throws Exception {
 		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
 				"{\"key1\": \"value1\"}".getBytes());
-		MvcResult result = uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+
+		uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+
 		assert fakeFtpServer.getFileSystem().isFile("/home/text.txt");
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
-		System.err.println(result.getResponse().getContentAsString());
 	}
 
 	@Test
@@ -64,18 +66,79 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 		MockMultipartFile jsonFile2 = new MockMultipartFile("file", "test2.json", MediaType.APPLICATION_JSON.toString(),
 				"{\"key2\": \"value2\"}".getBytes());
 
-		MvcResult result = uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json",
-				"/home/test2.json", jsonFile, jsonFile2);
+		uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json",
+				"/home/test2.json", jsonFile, jsonFile2, false, false);
+
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test2.json"));
-		System.err.println(result.getResponse().getContentAsString());
 	}
 
 	@Test
 	public void cannotSendFileToUnknownPath() throws Exception {
 		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
 				"{\"key1\": \"value1\"}".getBytes());
+
 		uploadFileToServer(status().isForbidden(), ftpServerPOJO.getId(), "/data/test.json", jsonFile);
+	}
+
+	@Test
+	public void downloadFileDownloadsAFileFromTheFtpServer() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
+		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/text.txt");
+
+		Assertions.assertEquals(TEST_TEXT_FILE_CONTENT, result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void canUploadAndDownloadABinaryFile() throws Exception {
+		byte[] fileContent = getClass().getClassLoader().getResourceAsStream("chibi_doctor.jpg").readAllBytes();
+		MockMultipartFile imgFile = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
+				fileContent);
+
+		uploadBinaryFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg", imgFile);
+		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg");
+
+		checkBinaryFilesAreEquals(fileContent, result.getResponse().getContentAsByteArray());
+	}
+
+	@Test
+	public void canUploadAndDownloadATextFile() throws Exception {
+		String fileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				fileContent.getBytes());
+
+		uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+
+		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
+		Assertions.assertEquals(fileContent, result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void canUploadAndDownloadATwoFilesOfDifferentType() throws Exception {
+		byte[] imgFileContent = getClass().getClassLoader().getResourceAsStream("chibi_doctor.jpg").readAllBytes();
+		MockMultipartFile imgFile = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
+				imgFileContent);
+		String txtFileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				txtFileContent.getBytes());
+
+		uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg", "/home/test.json", imgFile,
+				jsonFile,
+				true, false);
+
+		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg");
+		checkBinaryFilesAreEquals(imgFileContent, result.getResponse().getContentAsByteArray());
+
+		result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
+		Assertions.assertEquals(txtFileContent, result.getResponse().getContentAsString());
+	}
+
+	private void checkBinaryFilesAreEquals(byte[] fileContent, byte[] actualFileContent) {
+		Assertions.assertEquals(fileContent.length, actualFileContent.length);
+		for (int i = 0; i < fileContent.length; i++) {
+			Assertions.assertEquals(fileContent[i], actualFileContent[i]);
+		}
 	}
 
 	@Test
@@ -94,7 +157,9 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	@Test
 	public void canDeleteDirectoryIfEmpty() throws Exception {
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+
 		sendRequestToDeleteDirectory(status().isNoContent(), ftpServerPOJO.getId(), "/dev");
+
 		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/dev"));
 	}
 
@@ -102,6 +167,7 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	public void cannotDeleteDirectoryIfNotEmpty() throws Exception {
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
 		sendRequestToDeleteDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home");
 
 	}
@@ -109,6 +175,7 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	@Test
 	public void canNotDeleteDirectoryIfPathWrong() throws Exception {
 		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/home/blob"));
+
 		sendRequestToDeleteDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home/blob");
 	}
 
@@ -116,7 +183,9 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	public void canRenameDirectory() throws Exception {
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
 		sendRequestToRenameDirectory(status().isOk(), ftpServerPOJO.getId(), "/home", "/newHome");
+
 		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/home"));
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/newHome"));
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/newHome/text.txt"));
@@ -126,6 +195,7 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	public void cannotRenameDirectoryToAlreadyExistingOne() throws Exception {
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+
 		sendRequestToRenameDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home", "/dev");
 	}
 
@@ -177,42 +247,6 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	@Test
 	public void cannotDeleteFileIfFileIsDirectory() throws Exception {
 		sendRequestToDeleteFile(status().isForbidden(), ftpServerPOJO.getId(), "/home");
-	}
-
-
-	@Test
-	public void downloadFileDownloadsAFileFromTheFtpServer() throws Exception {
-		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
-
-		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/text.txt");
-		Assertions.assertEquals(TEST_TEXT_FILE_CONTENT, result.getResponse().getContentAsString());
-	}
-
-	@Test
-	public void canUploadAndDownloadABinaryFile() throws Exception {
-		//		byte[] fileContent = "123456789".getBytes();
-		//		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.png", MediaType.APPLICATION_JSON.toString(),
-		//				fileContent);
-		//		uploadBinaryFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.png", jsonFile);
-		//		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.png");
-		//		Assertions.assertEquals(fileContent, result.getResponse().getContentAsByteArray());
-
-		String fileContent = String.format("{\"key1\": \"value1\"}\nHelloWorld");
-		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
-				fileContent.getBytes());
-		uploadBinaryFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
-		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
-		Assertions.assertEquals(fileContent, result.getResponse().getContentAsString());
-	}
-
-	@Test
-	public void canUploadAndDownloadATextFile() throws Exception {
-		String fileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
-		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
-				fileContent.getBytes());
-		uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
-		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
-		Assertions.assertEquals(fileContent, result.getResponse().getContentAsString());
 	}
 
 

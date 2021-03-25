@@ -16,6 +16,8 @@ import java.util.List;
 @CommonsLog
 public class FTPConnectorImpl implements FTPConnector {
 
+	public static final FileType DEFAULT_FILE_TYPE = FileType.ASCII;
+
 	@Override
 	public List<FTPFile> list(Server server, String path, String username, String password) {
 		log.info(String.format("Listing files from the FTP Server at path %s", path));
@@ -24,17 +26,20 @@ public class FTPConnectorImpl implements FTPConnector {
 	}
 
 	@Override
-	public void sendFile(Server server, String path, String username, String password, MultipartFile file) {
+	public void sendFile(Server server, String path, String username, String password, MultipartFile file,
+						 FileType fileType) {
 		log.info(String.format("Sending a file to the FTP Server at path %s", path));
 		sendSimpleCommand(server, username, password,
-				(FTPClient ftpClient) -> ftpClient.storeFile(path, file.getInputStream()));
+				(FTPClient ftpClient) -> ftpClient.storeFile(path, file.getInputStream()), fileType);
 	}
 
 	@Override
-	public void getFile(Server server, String path, String username, String password, OutputStream out) {
+	public void downloadFile(Server server, String path, String username, String password, OutputStream out,
+							 FileType fileType) {
 		log.info(String.format("Download file %s", path));
 		sendSimpleCommand(server, username, password,
-				(FTPClient ftpClient) -> ftpClient.retrieveFile(path, out));
+				(FTPClient ftpClient) -> ftpClient.retrieveFile(path, out),
+				fileType);
 	}
 
 	@Override
@@ -88,8 +93,14 @@ public class FTPConnectorImpl implements FTPConnector {
 	}
 
 	private void sendSimpleCommand(Server server, String username, String password, SimpleCommand operation) {
+		sendSimpleCommand(server, username, password, operation, DEFAULT_FILE_TYPE);
+	}
+
+	private void sendSimpleCommand(Server server, String username, String password, SimpleCommand operation,
+								   FileType transferFileType) {
 		try {
 			FTPClient ftpClient = connectToServer(server, username, password);
+			ftpClient.setFileType(transferFileType.getTypeInt());
 			if (!operation.execute(ftpClient)) {
 				safeDisconnect(ftpClient);
 				throw new FTPOperationException(

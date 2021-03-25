@@ -38,38 +38,43 @@ public class FTPController {
 
 	@GetMapping(FILES)
 	public ResponseEntity<Resource> downloadFile(@PathVariable int serverId, @RequestParam String path,
-												 @RequestHeader HttpHeaders headers) {
+												 @RequestHeader HttpHeaders headers, @RequestParam boolean binary) {
 		Resource resource = ftpService.downloadFile(serverId,
 				Utils.getToken(headers),
 				path,
 				Utils.getHeaderValue(headers, FTP_USERNAME),
-				Utils.getHeaderValue(headers, FTP_PASSWORD));
+				Utils.getHeaderValue(headers, FTP_PASSWORD),
+				binary);
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						"attachment; filename=\"" + resource.getFilename() + "\"")
 				.body(resource);
 	}
 
-	public void uploadFile(@RequestParam("file") MultipartFile file, @PathVariable int serverId,
-						   @RequestParam String path,
-						   @RequestHeader HttpHeaders headers) {
+	protected void uploadFile(MultipartFile file,
+							  int serverId,
+							  String path,
+							  HttpHeaders headers,
+							  boolean binary) {
 		ftpService.store(serverId,
 				Utils.getToken(headers),
 				path,
 				Utils.getHeaderValue(headers, FTP_USERNAME),
 				Utils.getHeaderValue(headers, FTP_PASSWORD),
-				file);
+				file, binary);
 	}
 
 	@PostMapping(FILES)
-	public void uploadMultipleFiles(@RequestParam("file") MultipartFile[] files, @PathVariable int serverId,
+	public void uploadMultipleFiles(@RequestParam("file") MultipartFile[] files,
+									@PathVariable int serverId,
 									@RequestParam String[] path,
-									@RequestHeader HttpHeaders headers) {
-		if (path.length != files.length) {
-			throw new IllegalArgumentException("There must be as many paths as files");
+									@RequestHeader HttpHeaders headers,
+									@RequestParam boolean[] binary) {
+		if (path.length != files.length || path.length != binary.length) {
+			throw new IllegalArgumentException("There must be as many paths and binary arguments as files");
 		}
 		for (int i = 0; i < files.length; i++) {
-			uploadFile(files[i], serverId, path[i], headers);
+			uploadFile(files[i], serverId, path[i], headers, binary[i]);
 		}
 	}
 

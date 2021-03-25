@@ -32,12 +32,26 @@ public interface FTPConnector {
 	 * @param username the username of the user
 	 * @param password the password of the user
 	 * @param file     file the file to upload
+	 * @param fileType the type of the file to send
 	 * @throws FTPConnectException   if there is an error while connecting to the server
 	 * @throws FTPOperationException if there is an error during the operation
 	 */
-	void sendFile(Server server, String path, String username, String password, MultipartFile file);
+	void sendFile(Server server, String path, String username, String password, MultipartFile file,
+				  FileType fileType);
 
-	void getFile(Server server, String path, String username, String password, OutputStream out);
+	/**
+	 * Downloads a file from the server
+	 *
+	 * @param server   the server to connect to
+	 * @param path     the path where the file will be stored
+	 * @param username the username of the user
+	 * @param password the password of the user
+	 * @param fileType the type of the file to download
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error during the operation
+	 */
+	void downloadFile(Server server, String path, String username, String password, OutputStream out,
+					  FileType fileType);
 
 	/**
 	 * Renames a file

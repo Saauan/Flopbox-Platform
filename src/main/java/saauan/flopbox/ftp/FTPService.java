@@ -58,7 +58,7 @@ public class FTPService {
 	}
 
 	/**
-	 * Returns a list of files contained in the path, on the FTP server.
+	 * Stores a file on the ftp server
 	 *
 	 * @param serverId the id of the server
 	 * @param token    the authentication token of the user
@@ -66,25 +66,49 @@ public class FTPService {
 	 * @param username the FTP username of the user
 	 * @param password the FTP password of the user
 	 * @param file     the file to upload
+	 * @param binary   true if the file is of binary type, false otherwise
 	 * @throws FTPConnectException   if there is an error while connecting to the server
 	 * @throws FTPOperationException if there is an error while performing the operation on the server
 	 */
-	public void store(int serverId, String token, String path, String username, String password, MultipartFile file) {
+	public void store(int serverId, String token, String path, String username, String password, MultipartFile file,
+					  boolean binary) {
 		User user = userRepository.findByToken(token).orElseThrow();
 		Server server = serverRepository.findByIdAndUser(serverId, user)
 				.orElseThrow(
 						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
-		ftpConnector.sendFile(server, path, username, password, file);
+		ftpConnector.sendFile(server, path, username, password, file, getFileType(binary));
 	}
 
+	/**
+	 * Downloads a file from the FTP server
+	 *
+	 * @param serverId the id of the server
+	 * @param token    the authentication token of the user
+	 * @param path     the path where the file is located
+	 * @param username the FTP username of the user
+	 * @param password the FTP password of the user
+	 * @param binary   true if the file is of binary type, false otherwise
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error while performing the operation on the server
+	 */
 	@SneakyThrows
-	public Resource downloadFile(int serverId, String token, String path, String username, String password) {
+	public Resource downloadFile(int serverId, String token, String path, String username, String password,
+								 boolean binary) {
 		User user = userRepository.findByToken(token).orElseThrow();
 		Server server = serverRepository.findByIdAndUser(serverId, user)
 				.orElseThrow(
 						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		File tempFile = getTemporaryFile(Path.of(path).getFileName().toString());
+		OutputStream out = new FileOutputStream(tempFile);
+
+		ftpConnector.downloadFile(server, path, username, password, out, getFileType(binary));
+
+		out.close();
+		return new FileSystemResource(tempFile);
+	}
+
+	private File getTemporaryFile(String fileName) {
 		String tmpdir = System.getProperty("java.io.tmpdir");
-		String fileName = Path.of(path).getFileName().toString();
 		log.debug(String.format("Creating file %s", tmpdir + "/" + fileName));
 		var file = new File(tmpdir + "/" + fileName);
 		try {
@@ -94,10 +118,12 @@ public class FTPService {
 		} catch (IOException e) {
 			throw new RuntimeException("There was an error when creating the temporary file :", e);
 		}
-		OutputStream out = new FileOutputStream(file);
-		ftpConnector.getFile(server, path, username, password, out);
-		out.close();
-		return new FileSystemResource(file);
+		return file;
+	}
+
+	private FileType getFileType(boolean binary) {
+		FileType transferFileType = binary ? FileType.BINARY : FileType.ASCII;
+		return transferFileType;
 	}
 
 	/**
