@@ -182,17 +182,37 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 
 	@Test
 	public void downloadFileDownloadsAFileFromTheFtpServer() throws Exception {
-		Assertions.fail();
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
+		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/text.txt");
+		Assertions.assertEquals(TEST_TEXT_FILE_CONTENT, result.getResponse().getContentAsString());
 	}
 
 	@Test
 	public void canUploadAndDownloadABinaryFile() throws Exception {
-		Assertions.fail();
+		//		byte[] fileContent = "123456789".getBytes();
+		//		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.png", MediaType.APPLICATION_JSON.toString(),
+		//				fileContent);
+		//		uploadBinaryFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.png", jsonFile);
+		//		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.png");
+		//		Assertions.assertEquals(fileContent, result.getResponse().getContentAsByteArray());
+
+		String fileContent = String.format("{\"key1\": \"value1\"}\nHelloWorld");
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				fileContent.getBytes());
+		uploadBinaryFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
+		Assertions.assertEquals(fileContent, result.getResponse().getContentAsString());
 	}
 
 	@Test
 	public void canUploadAndDownloadATextFile() throws Exception {
-		Assertions.fail();
+		String fileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				fileContent.getBytes());
+		uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
+		Assertions.assertEquals(fileContent, result.getResponse().getContentAsString());
 	}
 
 
