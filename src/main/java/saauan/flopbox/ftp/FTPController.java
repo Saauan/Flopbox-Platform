@@ -1,11 +1,20 @@
 package saauan.flopbox.ftp;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import saauan.flopbox.FlopBoxApplication;
 import saauan.flopbox.Utils;
 
 import java.util.Map;
@@ -28,6 +37,17 @@ public class FTPController {
 		this.ftpService = ftpService;
 	}
 
+	@Operation(summary = "List files on the FTP Server",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "200", description = "List files", content = {
+							@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+									array = @ArraySchema(schema = @Schema(implementation = FTPFile.class)))}),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@GetMapping(LIST)
 	public Map<String, Object> list(@PathVariable int serverId, @RequestParam String path,
 									@RequestHeader HttpHeaders headers) {
@@ -39,6 +59,16 @@ public class FTPController {
 				"files");
 	}
 
+	@Operation(summary = "Download a file",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "200", description = "File download", content = {
+							@Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)}),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@GetMapping(FILES)
 	public ResponseEntity<Resource> downloadFile(@PathVariable int serverId, @RequestParam String path,
 												 @RequestHeader HttpHeaders headers, @RequestParam boolean binary) {
@@ -67,6 +97,15 @@ public class FTPController {
 				file, binary);
 	}
 
+	@Operation(summary = "Upload files on the FTP Server",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "200", description = "Files uploaded"),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@PostMapping(FILES)
 	public void uploadMultipleFiles(@RequestParam("file") MultipartFile[] files,
 									@PathVariable int serverId,
@@ -81,6 +120,15 @@ public class FTPController {
 		}
 	}
 
+	@Operation(summary = "Rename a file on the FTP server",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "200", description = "File renamed"),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@PatchMapping(FILES)
 	public void renameFile(@PathVariable int serverId,
 						   @RequestParam String path,
@@ -94,6 +142,15 @@ public class FTPController {
 				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 
+	@Operation(summary = "Delete a file on the FTP server",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "204", description = "File deleted"),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@DeleteMapping(FILES)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteFile(@PathVariable int serverId,
@@ -106,6 +163,16 @@ public class FTPController {
 				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 
+	@Operation(summary = "Download a directory as a zip",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "200", description = "Directory downloaded", content = {
+							@Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)}),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@GetMapping(DIRECTORIES)
 	public ResponseEntity<Resource> downloadZipirectory(@PathVariable int serverId,
 														@RequestParam String path,
@@ -121,7 +188,17 @@ public class FTPController {
 				.body(resource);
 	}
 
+	@Operation(summary = "Create a directory on the FTP server",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "201", description = "Directory created"),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@PostMapping(DIRECTORIES)
+	@ResponseStatus(HttpStatus.CREATED)
 	public void createDirectory(@PathVariable int serverId,
 								@RequestParam String path,
 								@RequestHeader HttpHeaders headers) {
@@ -132,6 +209,15 @@ public class FTPController {
 				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 
+	@Operation(summary = "Delete a directory on the FTP server",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "204", description = "Directory deleted"),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@DeleteMapping(DIRECTORIES)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteDirectory(@PathVariable int serverId,
@@ -144,6 +230,15 @@ public class FTPController {
 				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 
+	@Operation(summary = "Rename a directory on the FTP server",
+			security = @SecurityRequirement(name = FlopBoxApplication.FLOPBOX_SECURITY),
+			responses = {
+					@ApiResponse(responseCode = "200", description = "Directory renamed"),
+					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
+					@ApiResponse(responseCode = "404", description = "Server not found"),
+					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			}
+	)
 	@PatchMapping(DIRECTORIES)
 	public void renameDirectory(@PathVariable int serverId,
 								@RequestParam String path,
