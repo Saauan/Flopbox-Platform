@@ -8,6 +8,8 @@ Tristan Coignion
 
 Flopbox est une plateforme écrite en Java qui expose une API REST permettant de communiquer avec des serveurs FTP.
 
+## [Video de présentation](https://youtu.be/uoqIJ8hsSDo)
+
 ## Installation
 
 Pour installer l'application utilisez la commande :
