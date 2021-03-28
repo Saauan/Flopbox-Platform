@@ -95,11 +95,18 @@ public class UserService {
 		return StringUtils.EMPTY;
 	}
 
+	public void logout(String token) {
+		User user = userRepository.findByToken(token).orElseThrow();
+		user.setToken(null);
+		userRepository.save(user);
+	}
+
 	public Optional<org.springframework.security.core.userdetails.User> findByToken(String token) {
 		Optional<User> optionalUser = userRepository.findByToken(token);
-		if(optionalUser.isPresent()) {
+		if (optionalUser.isPresent()) {
 			User appUser = optionalUser.get();
-			org.springframework.security.core.userdetails.User user = new org.springframework.security.core.userdetails.User(appUser.getUsername(), appUser.getPassword(), true, true, true, true,
+			org.springframework.security.core.userdetails.User user = new org.springframework.security.core.userdetails.User(
+					appUser.getUsername(), appUser.getPassword(), true, true, true, true,
 					AuthorityUtils.createAuthorityList("USER"));
 			return Optional.of(user);
 		}
