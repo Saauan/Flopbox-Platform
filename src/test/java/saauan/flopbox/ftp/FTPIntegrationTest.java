@@ -171,16 +171,16 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 				entryBytes.write(buffer, 0, len);
 			}
 			byte[] bytesContent = entryBytes.toByteArray();
-			if (zipEntry.getName().equals("/home/test.jpg")) {
+			if (zipEntry.getName().equals("test.jpg")) {
 				checkBinaryFilesAreEquals(imgFileContent, bytesContent);
-			} else if (zipEntry.getName().equals("/home/test.json")) {
+			} else if (zipEntry.getName().equals("test.json")) {
 				checkBinaryFilesAreEquals(txtFileContent.getBytes(), bytesContent);
 			} else {
 				System.err.println(zipEntry.getName());
 			}
 			zipEntry = zis.getNextEntry();
 		}
-		Assertions.assertEquals(3, nbEntries);
+		Assertions.assertEquals(4, nbEntries);
 		zis.closeEntry();
 		zis.close();
 	}

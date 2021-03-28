@@ -103,11 +103,20 @@ public class FTPController {
 				Utils.getHeaderValue(headers, FTP_PASSWORD));
 	}
 
-	//	public ResponseEntity<Resource> downloadZipirectory(@PathVariable int serverId,
-	//								  @RequestParam String path,
-	//								  @RequestHeader HttpHeaders headers) {
-	//
-	//	}
+	@GetMapping(DIRECTORIES)
+	public ResponseEntity<Resource> downloadZipirectory(@PathVariable int serverId,
+														@RequestParam String path,
+														@RequestHeader HttpHeaders headers) {
+		Resource resource = ftpService.downloadDirectory(serverId,
+				Utils.getToken(headers),
+				path,
+				Utils.getHeaderValue(headers, FTP_USERNAME),
+				Utils.getHeaderValue(headers, FTP_PASSWORD));
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
+	}
 
 	@PostMapping(DIRECTORIES)
 	public void createDirectory(@PathVariable int serverId,

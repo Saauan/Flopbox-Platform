@@ -14,12 +14,11 @@ import saauan.flopbox.server.ServerRepository;
 import saauan.flopbox.user.User;
 import saauan.flopbox.user.UserRepository;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @CommonsLog
@@ -182,6 +181,29 @@ public class FTPService {
 				.orElseThrow(
 						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
 		ftpConnector.createDirectory(server, path, username, password);
+	}
+
+	@SneakyThrows
+	public Resource downloadDirectory(int serverId, String token, String path, String username, String password) {
+		User user = userRepository.findByToken(token).orElseThrow();
+		Server server = serverRepository.findByIdAndUser(serverId, user)
+				.orElseThrow(
+						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		List<FTPFile> files = ftpConnector.list(server, path, username, password);
+		File zipFile = getTemporaryFile("ftpZip.zip");
+		FileOutputStream fos = new FileOutputStream(zipFile);
+		ZipOutputStream zipOut = new ZipOutputStream(fos);
+		for (FTPFile file : files) {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ftpConnector.downloadFile(server, file.getName(), username, password, bos, FileType.BINARY);
+			ZipEntry zipEntry = new ZipEntry(file.getName());
+			zipOut.putNextEntry(zipEntry);
+			zipOut.write(bos.toByteArray());
+			bos.close();
+		}
+		zipOut.close();
+		fos.close();
+		return new FileSystemResource(zipFile);
 	}
 
 	/**
