@@ -11,6 +11,9 @@ import saauan.flopbox.user.UserService;
 
 import java.util.List;
 
+/**
+ * Provides operations for interacting with servers
+ */
 @Service
 @CommonsLog
 public class ServerService {

@@ -1,5 +1,6 @@
 package saauan.flopbox.server;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -20,7 +21,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
-//@JsonRootName() // TODO
+@JsonRootName("server")
 public class Server {
 
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)

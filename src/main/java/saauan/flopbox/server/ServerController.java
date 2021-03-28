@@ -9,8 +9,10 @@ import saauan.flopbox.Utils;
 import saauan.flopbox.exceptions.ResourceAlreadyExistException;
 
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Conroller for server related endpoints
+ */
 @RestController()
 @RequestMapping("servers")
 public class ServerController {
@@ -39,10 +41,10 @@ public class ServerController {
 	 */
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
-	public Map<String, Object> addServer(@RequestBody Server server,
-										 @RequestHeader HttpHeaders headers) {
+	public Server addServer(@RequestBody Server server,
+							@RequestHeader HttpHeaders headers) {
 		try {
-			return Utils.mapify(serverService.addServer(server, Utils.getToken(headers)), "server");
+			return serverService.addServer(server, Utils.getToken(headers));
 		} catch (ResourceAlreadyExistException e) {
 			throw new ResponseStatusException(
 					HttpStatus.FORBIDDEN, e.getMessage(), e);
