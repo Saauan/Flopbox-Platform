@@ -1,5 +1,6 @@
 package saauan.flopbox.server;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -34,8 +35,11 @@ public class Server {
 	@NonNull
 	private int port;
 
+	private boolean passive;
+
 	@ManyToOne
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@EqualsAndHashCode.Include
+	@JsonIgnore
 	private User user;
 }
