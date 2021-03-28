@@ -1,6 +1,7 @@
 package saauan.flopbox.user;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +31,7 @@ public class UserController {
 
 	@ApiResponse(responseCode = "200", description = "Found the users",
 			content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-					schema = @Schema(implementation = List.class))})
+					array = @ArraySchema(schema = @Schema(implementation = User.class)))})
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Get all the users")
 	private List<User> getAllUsers() {

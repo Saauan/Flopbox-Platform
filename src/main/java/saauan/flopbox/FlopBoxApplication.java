@@ -15,13 +15,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 				description = "This app provides REST API for interacting with a ftp server")
 )
 @SecurityScheme(
-		name = "Bearer token",
+		name = FlopBoxApplication.FLOPBOX_SECURITY,
 		type = SecuritySchemeType.OAUTH2,
 		in = SecuritySchemeIn.HEADER,
 		bearerFormat = "token"
 )
 @SpringBootApplication
 public class FlopBoxApplication {
+
+	public static final String FLOPBOX_SECURITY = "FlopboxSecurity";
 
 	public static void main(String[] args) {
 		SpringApplication.run(FlopBoxApplication.class, args);
