@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>saauan.flopbox.server</OriginalElement>
+  <nodes>
+    <node x="684.0" y="60.0">saauan.flopbox.server.ServerRepository</node>
+    <node x="-16.0" y="373.0">saauan.flopbox.server.IllegalServerAccessException</node>
+    <node x="336.5" y="317.5">saauan.flopbox.server.ServerService</node>
+    <node x="700.0" y="637.5">saauan.flopbox.server.ServerController</node>
+    <node x="748.0" y="262.0">saauan.flopbox.server.Server</node>
+  </nodes>
+  <notes />
+  <edges />
+  <settings layout="Directed Orthogonal" zoom="0.6238532110091743" x="490.0" y="431.5" />
+  <SelectedNodes>
+    <node>saauan.flopbox.server.ServerRepository</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>Production</SCOPE>
+  <VISIBILITY>protected</VISIBILITY>
+</Diagram>
+
