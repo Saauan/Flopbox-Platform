@@ -10,11 +10,11 @@ import java.util.Optional;
 @Repository
 public interface ServerRepository extends JpaRepository<Server, Integer> {
 	@Deprecated
-	public Server findByUrl(String url);
+	Server findByUrl(String url);
 
-	public Server findByUserAndUrl(User user, String url);
+	Server findByUserAndUrl(User user, String url);
 
-	public Optional<Server> findByIdAndUser(Integer id, User user);
+	Optional<Server> findByIdAndUser(Integer id, User user);
 
-	public List<Server> findByUser(User user);
+	List<Server> findByUser(User user);
 }

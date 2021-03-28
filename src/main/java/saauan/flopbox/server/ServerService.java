@@ -11,6 +11,9 @@ import saauan.flopbox.user.UserService;
 
 import java.util.List;
 
+/**
+ * Provides operations for interacting with servers
+ */
 @Service
 @CommonsLog
 public class ServerService {
@@ -33,7 +36,7 @@ public class ServerService {
 	 */
 	public Server addServer(Server server, String token) {
 		log.info(String.format("Adding server %s", server));
-		User user = userService.findUserByToken(token).orElseThrow();
+		User user = Utils.findObjectOrThrow(() -> userService.findUserByToken(token), log);
 		if (this.serverRepository.findByUserAndUrl(user, server.getUrl()) != null) {
 			Utils.logAndThrow(log, ResourceAlreadyExistException.class,
 					String.format("Server %s already exists", server.getUrl()));
@@ -50,7 +53,7 @@ public class ServerService {
 	 */
 	public List<Server> getAllServers(String token) {
 		log.info("Getting all servers");
-		User user = userService.findUserByToken(token).orElseThrow();
+		User user = Utils.findObjectOrThrow(() -> userService.findUserByToken(token), log);
 		return serverRepository.findByUser(user);
 	}
 
@@ -63,8 +66,8 @@ public class ServerService {
 	 */
 	public Server getServer(int serverId, String token) {
 		log.info(String.format("Getting server %s", serverId));
-		User user = userService.findUserByToken(token).orElseThrow();
-		Server server = Utils.findObjectOrThrow(serverRepository, serverId, log);
+		User user = Utils.findObjectOrThrow(() -> userService.findUserByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findById(serverId), log);
 		throwIfServerDoesNotBelongToUser(server, user);
 		return server;
 
@@ -79,11 +82,11 @@ public class ServerService {
 	 */
 	public void modifyServer(Server serverModifications, int serverId, String token) {
 		log.info(String.format("Modifying server %s", serverId));
-		User user = userService.findUserByToken(token).orElseThrow();
-		Server serverToModify = Utils.findObjectOrThrow(serverRepository, serverId, log);
+		User user = Utils.findObjectOrThrow(() -> userService.findUserByToken(token), log);
+		Server serverToModify = Utils.findObjectOrThrow(() -> serverRepository.findById(serverId), log);
 		throwIfServerDoesNotBelongToUser(serverToModify, user);
-		if(serverModifications.getPort() != 0) serverToModify.setPort(serverModifications.getPort());
-		if(serverModifications.getUrl() != null) serverToModify.setUrl(serverModifications.getUrl());
+		if (serverModifications.getPort() != 0) serverToModify.setPort(serverModifications.getPort());
+		if (serverModifications.getUrl() != null) serverToModify.setUrl(serverModifications.getUrl());
 		serverRepository.save(serverToModify);
 	}
 
@@ -95,8 +98,8 @@ public class ServerService {
 	 */
 	public void deleteServer(int serverId, String token) {
 		log.info(String.format("Deleting server %s", serverId));
-		User user = userService.findUserByToken(token).orElseThrow();
-		Server serverToDelete = Utils.findObjectOrThrow(serverRepository, serverId, log);
+		User user = Utils.findObjectOrThrow(() -> userService.findUserByToken(token), log);
+		Server serverToDelete = Utils.findObjectOrThrow(() -> serverRepository.findById(serverId), log);
 		throwIfServerDoesNotBelongToUser(serverToDelete, user);
 		serverRepository.delete(serverToDelete);
 	}

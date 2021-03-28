@@ -1,0 +1,1176 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "FlopBox API",
+    "description": "This app provides REST API for interacting with a ftp server",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/servers/{serverId}": {
+      "get": {
+        "tags": [
+          "server-controller"
+        ],
+        "summary": "Get a server available to the user",
+        "operationId": "getServer",
+        "parameters": [
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found the servers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/server"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Server not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/server"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "server-controller"
+        ],
+        "summary": "Modify a server",
+        "operationId": "modifyServer",
+        "parameters": [
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/server"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Server modified"
+          },
+          "404": {
+            "description": "Server not found"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "server-controller"
+        ],
+        "summary": "Delete a server",
+        "operationId": "deleteServer",
+        "parameters": [
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Server deleted"
+          },
+          "404": {
+            "description": "Server not found"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "summary": "Get all the users",
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "Found the users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "summary": "Add a user",
+        "operationId": "addUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "User created"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "403": {
+            "description": "User already exist"
+          }
+        }
+      }
+    },
+    "/token": {
+      "post": {
+        "tags": [
+          "token-controller"
+        ],
+        "summary": "Authenticate a user",
+        "operationId": "getToken",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/servers": {
+      "get": {
+        "tags": [
+          "server-controller"
+        ],
+        "summary": "Get all the servers available for the user",
+        "operationId": "getAllServers",
+        "responses": {
+          "200": {
+            "description": "Found the servers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/server"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "server-controller"
+        ],
+        "summary": "Add a server",
+        "operationId": "addServer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/server"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Found the servers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/server"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Server already exist",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/server"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      }
+    },
+    "/servers/{serverId}/files": {
+      "get": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Download a file",
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "binary",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File download",
+            "content": {
+              "application/octet-stream": {}
+            }
+          },
+          "403": {
+            "description": "Error during FTP operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Server not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Upload files on the FTP Server",
+        "operationId": "uploadMultipleFiles",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "file",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "binary",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "boolean"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Files uploaded"
+          },
+          "403": {
+            "description": "Error during FTP operation"
+          },
+          "404": {
+            "description": "Server not found"
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Delete a file on the FTP server",
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "File deleted"
+          },
+          "403": {
+            "description": "Error during FTP operation"
+          },
+          "404": {
+            "description": "Server not found"
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Rename a file on the FTP server",
+        "operationId": "renameFile",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File renamed"
+          },
+          "403": {
+            "description": "Error during FTP operation"
+          },
+          "404": {
+            "description": "Server not found"
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      }
+    },
+    "/servers/{serverId}/directories": {
+      "get": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Download a directory as a zip",
+        "operationId": "downloadZipirectory",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Directory downloaded",
+            "content": {
+              "application/octet-stream": {}
+            }
+          },
+          "403": {
+            "description": "Error during FTP operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Server not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Create a directory on the FTP server",
+        "operationId": "createDirectory",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Directory created"
+          },
+          "403": {
+            "description": "Error during FTP operation"
+          },
+          "404": {
+            "description": "Server not found"
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Delete a directory on the FTP server",
+        "operationId": "deleteDirectory",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Directory deleted"
+          },
+          "403": {
+            "description": "Error during FTP operation"
+          },
+          "404": {
+            "description": "Server not found"
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "Rename a directory on the FTP server",
+        "operationId": "renameDirectory",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Directory renamed"
+          },
+          "403": {
+            "description": "Error during FTP operation"
+          },
+          "404": {
+            "description": "Server not found"
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server"
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "token-controller"
+        ],
+        "summary": "Log out a user",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "Log out successful"
+          }
+        }
+      }
+    },
+    "/users/{username}": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "summary": "Get a user by its username",
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user-controller"
+        ],
+        "summary": "Delete a user",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/servers/{serverId}/list": {
+      "get": {
+        "tags": [
+          "ftp-controller"
+        ],
+        "summary": "List files on the FTP Server",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FTPFile"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error during FTP operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Server not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error while connecting to the FTP server",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "FlopboxSecurity": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "server": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "url": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "passive": {
+            "type": "boolean"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "FTPFile": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hardLinkCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rawListing": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "directory": {
+            "type": "boolean"
+          },
+          "file": {
+            "type": "boolean"
+          },
+          "unknown": {
+            "type": "boolean"
+          },
+          "symbolicLink": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "FlopboxSecurity": {
+        "type": "oauth2",
+        "in": "header",
+        "bearerFormat": "token"
+      }
+    }
+  }
+}

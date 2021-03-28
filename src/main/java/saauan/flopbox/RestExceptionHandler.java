@@ -39,6 +39,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {ResourceNotFoundException.class})
+//	@ResponseStatus(HttpStatus.NOT_FOUND)
 	protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex,
 																	 WebRequest request) {
 		log.error(ex.toString());
@@ -48,6 +49,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {IllegalServerAccessException.class})
+	//	@ResponseStatus(HttpStatus.FORBIDDEN)
 	protected ResponseEntity<Object> handleIllegalServerAccessException(IllegalServerAccessException ex,
 																		WebRequest request) {
 		log.error(ex.getStackTrace());
@@ -57,6 +59,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {FTPConnectException.class})
+	//	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	protected ResponseEntity<Object> handleFTPConnectException(FTPConnectException ex,
 															   WebRequest request) {
 		log.error(ex.toString());
@@ -66,6 +69,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {FTPOperationException.class})
+	//	@ResponseStatus(HttpStatus.FORBIDDEN)
 	protected ResponseEntity<Object> handleFTPOperationException(FTPOperationException ex,
 																 WebRequest request) {
 		log.error(ex.toString());

@@ -16,7 +16,6 @@ import java.util.UUID;
 @CommonsLog
 public class UserService {
 
-	// TODO: Refactor into interfaces
 
 	private final UserRepository userRepository;
 	private final static String alphanumericRegex = "[a-zA-Z0-9]+";
@@ -68,7 +67,7 @@ public class UserService {
 	 * @throws saauan.flopbox.exceptions.ResourceNotFoundException if the user if not found
 	 */
 	public User getUser(String username) {
-		return Utils.findObjectOrThrow(userRepository, username, log);
+		return Utils.findObjectOrThrow(() -> userRepository.findById(username), log);
 	}
 
 	/**
@@ -78,13 +77,20 @@ public class UserService {
 	 * @throws saauan.flopbox.exceptions.ResourceNotFoundException if the user if not found
 	 */
 	public void deleteUser(String username) {
-		User user = Utils.findObjectOrThrow(userRepository, username, log);
+		User user = Utils.findObjectOrThrow(() -> userRepository.findById(username), log);
 		userRepository.delete(user);
 	}
 
+	/**
+	 * Logins the user with a username and a password. If they are correct, the user gets a new Token, if not, no token is returned
+	 *
+	 * @param username the username
+	 * @param password the password
+	 * @return an authentication token, or null
+	 */
 	public String login(String username, String password) {
 		Optional<User> optionalUser = userRepository.login(username, password);
-		if(optionalUser.isPresent()) {
+		if (optionalUser.isPresent()) {
 			String token = UUID.randomUUID().toString();
 			User user = optionalUser.get();
 			user.setToken(token);
@@ -95,11 +101,23 @@ public class UserService {
 		return StringUtils.EMPTY;
 	}
 
+	/**
+	 * Logs out the user by setting its token to null
+	 *
+	 * @param token the token of the user
+	 */
+	public void logout(String token) {
+		User user = userRepository.findByToken(token).orElseThrow();
+		user.setToken(null);
+		userRepository.save(user);
+	}
+
 	public Optional<org.springframework.security.core.userdetails.User> findByToken(String token) {
 		Optional<User> optionalUser = userRepository.findByToken(token);
-		if(optionalUser.isPresent()) {
+		if (optionalUser.isPresent()) {
 			User appUser = optionalUser.get();
-			org.springframework.security.core.userdetails.User user = new org.springframework.security.core.userdetails.User(appUser.getUsername(), appUser.getPassword(), true, true, true, true,
+			org.springframework.security.core.userdetails.User user = new org.springframework.security.core.userdetails.User(
+					appUser.getUsername(), appUser.getPassword(), true, true, true, true,
 					AuthorityUtils.createAuthorityList("USER"));
 			return Optional.of(user);
 		}

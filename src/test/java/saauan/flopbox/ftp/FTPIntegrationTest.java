@@ -10,7 +10,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import saauan.flopbox.CustomFTPFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,10 +41,11 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	@Test
 	public void listReturnsACorrectListOfFiles() throws Exception {
 		MvcResult result = sendRequestToList(status().isOk(), ftpServerPOJO.getId(), "/home");
+
 		System.out.println(result.getResponse().getContentAsString());
 		List<CustomFTPFile> files = objectMapper
 				.readValue(objectMapper.readTree(result.getResponse().getContentAsString()).get("files").toString(),
-						new TypeReference<List<CustomFTPFile>>() {
+						new TypeReference<>() {
 						});
 		System.err.println(files.get(0).toFormattedString());
 		Assertions.assertFalse(files.isEmpty());
@@ -51,43 +56,241 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 	public void sendFileStoresItOnTheFTPServer() throws Exception {
 		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
 				"{\"key1\": \"value1\"}".getBytes());
-		MvcResult result = uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+
+		uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+
 		assert fakeFtpServer.getFileSystem().isFile("/home/text.txt");
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
-		System.err.println(result.getResponse().getContentAsString());
 	}
-	//
-	//	@Test
-	//	public void canSendMultipleFiles() throws Exception {
-	//		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(), "{\"key1\": \"value1\"}".getBytes());
-	//		MockMultipartFile jsonFile = new MockMultipartFile("file", "test2.json", MediaType.APPLICATION_JSON.toString(), "{\"key2\": \"value2\"}".getBytes());
-	//
-	//		MvcResult result = uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile, jsonFile2);
-	//		assert fakeFtpServer.getFileSystem().isFile("/home/text.txt");
-	//		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
-	//		System.err.println(result.getResponse().getContentAsString());
-	//	}
+
+	@Test
+	public void canSendMultipleFiles() throws Exception {
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				"{\"key1\": \"value1\"}".getBytes());
+		MockMultipartFile jsonFile2 = new MockMultipartFile("file", "test2.json", MediaType.APPLICATION_JSON.toString(),
+				"{\"key2\": \"value2\"}".getBytes());
+
+		uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json",
+				"/home/test2.json", jsonFile, jsonFile2, false, false);
+
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test.json"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/test2.json"));
+	}
 
 	@Test
 	public void cannotSendFileToUnknownPath() throws Exception {
 		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
 				"{\"key1\": \"value1\"}".getBytes());
+
 		uploadFileToServer(status().isForbidden(), ftpServerPOJO.getId(), "/data/test.json", jsonFile);
 	}
 
 	@Test
 	public void downloadFileDownloadsAFileFromTheFtpServer() throws Exception {
-		Assertions.fail();
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
+		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/text.txt");
+
+		Assertions.assertEquals(TEST_TEXT_FILE_CONTENT, result.getResponse().getContentAsString());
 	}
 
 	@Test
 	public void canUploadAndDownloadABinaryFile() throws Exception {
-		Assertions.fail();
+		byte[] fileContent = getClass().getClassLoader().getResourceAsStream("chibi_doctor.jpg").readAllBytes();
+		MockMultipartFile imgFile = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
+				fileContent);
+
+		uploadBinaryFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg", imgFile);
+		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg");
+
+		checkBinaryFilesAreEquals(fileContent, result.getResponse().getContentAsByteArray());
 	}
 
 	@Test
 	public void canUploadAndDownloadATextFile() throws Exception {
-		Assertions.fail();
+		String fileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				fileContent.getBytes());
+
+		uploadFileToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.json", jsonFile);
+
+		MvcResult result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
+		Assertions.assertEquals(fileContent, result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void canUploadAndDownloadATwoFilesOfDifferentType() throws Exception {
+		byte[] imgFileContent = getClass().getClassLoader().getResourceAsStream("chibi_doctor.jpg").readAllBytes();
+		MockMultipartFile imgFile = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
+				imgFileContent);
+		String txtFileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				txtFileContent.getBytes());
+
+		uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg", "/home/test.json", imgFile,
+				jsonFile,
+				true, false);
+
+		MvcResult result = downloadBinaryFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg");
+		checkBinaryFilesAreEquals(imgFileContent, result.getResponse().getContentAsByteArray());
+
+		result = downloadFile(status().isOk(), ftpServerPOJO.getId(), "/home/test.json");
+		Assertions.assertEquals(txtFileContent, result.getResponse().getContentAsString());
+	}
+
+	private void checkBinaryFilesAreEquals(byte[] fileContent, byte[] actualFileContent) {
+		Assertions.assertEquals(fileContent.length, actualFileContent.length);
+		for (int i = 0; i < fileContent.length; i++) {
+			Assertions.assertEquals(fileContent[i], actualFileContent[i]);
+		}
+	}
+
+	@Test
+	public void canDownloadMultipleFiles() throws Exception {
+		byte[] imgFileContent = getClass().getClassLoader().getResourceAsStream("chibi_doctor.jpg").readAllBytes();
+		MockMultipartFile imgFile = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
+				imgFileContent);
+		String txtFileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				txtFileContent.getBytes());
+		uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg", "/home/test.json", imgFile,
+				jsonFile,
+				true, false);
+
+		MvcResult result = downloadFiles(status().isOk(), ftpServerPOJO.getId(), "/home");
+
+		ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(result.getResponse().getContentAsByteArray()));
+		ZipEntry zipEntry = zis.getNextEntry();
+		int nbEntries = 0;
+		byte[] buffer = new byte[1024];
+		while (zipEntry != null) {
+			nbEntries++;
+			ByteArrayOutputStream entryBytes = new ByteArrayOutputStream();
+			int len = 0;
+			while ((len = zis.read(buffer)) > 0) {
+				entryBytes.write(buffer, 0, len);
+			}
+			byte[] bytesContent = entryBytes.toByteArray();
+			if (zipEntry.getName().equals("test.jpg")) {
+				checkBinaryFilesAreEquals(imgFileContent, bytesContent);
+			} else if (zipEntry.getName().equals("test.json")) {
+				checkBinaryFilesAreEquals(txtFileContent.getBytes(), bytesContent);
+			} else {
+				System.err.println(zipEntry.getName());
+			}
+			zipEntry = zis.getNextEntry();
+		}
+		Assertions.assertEquals(4, nbEntries);
+		zis.closeEntry();
+		zis.close();
+	}
+
+	@Test
+	public void canCreateDirectory() throws Exception {
+		sendRequestToCreateDirectory(status().isCreated(), ftpServerPOJO.getId(), "/home/myDir");
+
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home/myDir"));
+	}
+
+	@Test
+	public void cannotCreateDirectoryIfPathIncorrect() throws Exception {
+		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/data/yo");
+		sendRequestToCreateDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home/myDir/bloup");
+	}
+
+	@Test
+	public void canDeleteDirectoryIfEmpty() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+
+		sendRequestToDeleteDirectory(status().isNoContent(), ftpServerPOJO.getId(), "/dev");
+
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+	}
+
+	@Test
+	public void cannotDeleteDirectoryIfNotEmpty() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
+		sendRequestToDeleteDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home");
+
+	}
+
+	@Test
+	public void canNotDeleteDirectoryIfPathWrong() throws Exception {
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/home/blob"));
+
+		sendRequestToDeleteDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home/blob");
+	}
+
+	@Test
+	public void canRenameDirectory() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
+		sendRequestToRenameDirectory(status().isOk(), ftpServerPOJO.getId(), "/home", "/newHome");
+
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/newHome"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/newHome/text.txt"));
+	}
+
+	@Test
+	public void cannotRenameDirectoryToAlreadyExistingOne() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/dev"));
+
+		sendRequestToRenameDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/home", "/dev");
+	}
+
+	@Test
+	public void cannotRenameDirectoryIfPathIsWrong() throws Exception {
+		sendRequestToRenameDirectory(status().isForbidden(), ftpServerPOJO.getId(), "/homeBad", "/newHome");
+	}
+
+	@Test
+	public void canRenameFile() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isFile("/dev/text.json"));
+
+		sendRequestToRenameFile(status().isOk(), ftpServerPOJO.getId(), "/home/text.txt", "/dev/text.json");
+
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/dev/text.json"));
+	}
+
+	@Test
+	public void cannotRenameFileIfFileDoesNotExist() throws Exception {
+		sendRequestToRenameFile(status().isForbidden(), ftpServerPOJO.getId(), "/blip/text.txt", "/dev/text.json");
+	}
+
+	@Test
+	public void cannotRenameFileIfNameConflicts() throws Exception {
+		sendRequestToRenameFile(status().isForbidden(), ftpServerPOJO.getId(), "/home/text.txt", "/home/run.exe");
+	}
+
+	@Test
+	public void cannotRenameFileIfRenamedFileIsInANonExistentDirectory() throws Exception {
+		sendRequestToRenameFile(status().isForbidden(), ftpServerPOJO.getId(), "/home/text.txt", "/blip/text.json");
+	}
+
+	@Test
+	public void canDeleteFile() throws Exception {
+		Assertions.assertTrue(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+
+		sendRequestToDeleteFile(status().isNoContent(), ftpServerPOJO.getId(), "/home/text.txt");
+
+		Assertions.assertFalse(fakeFtpServer.getFileSystem().isFile("/home/text.txt"));
+	}
+
+	@Test
+	public void cannotDeleteFileIfPathIsWrong() throws Exception {
+		sendRequestToDeleteFile(status().isForbidden(), ftpServerPOJO.getId(), "/blip/text.txt");
+	}
+
+	@Test
+	public void cannotDeleteFileIfFileIsDirectory() throws Exception {
+		sendRequestToDeleteFile(status().isForbidden(), ftpServerPOJO.getId(), "/home");
 	}
 
 

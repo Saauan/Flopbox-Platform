@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpHeaders;
 import saauan.flopbox.exceptions.ResourceNotFoundException;
 
@@ -16,19 +15,27 @@ import java.util.Optional;
 @UtilityClass
 public class Utils {
 
+	/**
+	 * Logs an exception and throws it
+	 */
 	@SneakyThrows
 	public void logAndThrow(Log log, Class<? extends RuntimeException> exceptionClass, String message) {
 		log.error(message);
 		throw exceptionClass.getDeclaredConstructor(String.class).newInstance(message);
 	}
 
-	public <T, ID> T findObjectOrThrow(JpaRepository<T, ID> repository, ID id, Log log) {
-		Optional<T> object = repository.findById(id);
+	public <T, ID> T findObjectOrThrow(ObjectFinderOperation<T> op, Log log) {
+		Optional<T> object = op.findObject();
 		if (object.isEmpty()) {
-			logAndThrow(log, ResourceNotFoundException.class, String.format("resource %s was not found", id));
+			logAndThrow(log, ResourceNotFoundException.class,
+					"resource was not found");
 			assert false : "Should never arrive here";
 		}
 		return object.get();
+	}
+
+	public interface ObjectFinderOperation<T> {
+		Optional<T> findObject();
 	}
 
 	public String getToken(HttpHeaders headers) {
