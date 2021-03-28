@@ -304,6 +304,22 @@
         "operationId": "downloadFile",
         "parameters": [
           {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "serverId",
             "in": "path",
             "required": true,
@@ -384,6 +400,22 @@
         "operationId": "uploadMultipleFiles",
         "parameters": [
           {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "file",
             "in": "query",
             "required": true,
@@ -455,6 +487,22 @@
         "operationId": "deleteFile",
         "parameters": [
           {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "serverId",
             "in": "path",
             "required": true,
@@ -499,6 +547,22 @@
         "summary": "Rename a file on the FTP server",
         "operationId": "renameFile",
         "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "serverId",
             "in": "path",
@@ -554,6 +618,22 @@
         "summary": "Download a directory as a zip",
         "operationId": "downloadZipirectory",
         "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "serverId",
             "in": "path",
@@ -627,6 +707,22 @@
         "operationId": "createDirectory",
         "parameters": [
           {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "serverId",
             "in": "path",
             "required": true,
@@ -672,6 +768,22 @@
         "operationId": "deleteDirectory",
         "parameters": [
           {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "serverId",
             "in": "path",
             "required": true,
@@ -716,6 +828,22 @@
         "summary": "Rename a directory on the FTP server",
         "operationId": "renameDirectory",
         "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "serverId",
             "in": "path",
@@ -851,6 +979,22 @@
         "summary": "List files on the FTP Server",
         "operationId": "list",
         "parameters": [
+          {
+            "name": "FTP-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FTP-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "serverId",
             "in": "path",

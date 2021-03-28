@@ -1,6 +1,8 @@
 package saauan.flopbox.ftp;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,6 +48,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@GetMapping(LIST)
@@ -67,6 +73,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@GetMapping(FILES)
@@ -104,6 +114,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@PostMapping(FILES)
@@ -127,6 +141,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@PatchMapping(FILES)
@@ -149,6 +167,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@DeleteMapping(FILES)
@@ -171,6 +193,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@GetMapping(DIRECTORIES)
@@ -195,6 +221,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@PostMapping(DIRECTORIES)
@@ -216,6 +246,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@DeleteMapping(DIRECTORIES)
@@ -237,6 +271,10 @@ public class FTPController {
 					@ApiResponse(responseCode = "403", description = "Error during FTP operation"),
 					@ApiResponse(responseCode = "404", description = "Server not found"),
 					@ApiResponse(responseCode = "500", description = "Error while connecting to the FTP server")
+			},
+			parameters = {
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Username", schema = @Schema(implementation = String.class)),
+					@Parameter(in = ParameterIn.HEADER, required = true, name = "FTP-Password", schema = @Schema(implementation = String.class))
 			}
 	)
 	@PatchMapping(DIRECTORIES)
