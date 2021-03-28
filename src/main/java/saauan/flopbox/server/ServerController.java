@@ -38,6 +38,7 @@ public class ServerController {
 	 * Adds a server to the database
 	 *
 	 * @param server the server to add
+	 * @return the added server
 	 */
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping

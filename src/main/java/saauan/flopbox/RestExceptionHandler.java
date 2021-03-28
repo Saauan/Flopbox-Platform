@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -39,6 +40,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {ResourceNotFoundException.class})
+	@ResponseStatus(HttpStatus.NOT_FOUND)
 	protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex,
 																	 WebRequest request) {
 		log.error(ex.toString());
@@ -48,6 +50,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {IllegalServerAccessException.class})
+	@ResponseStatus(HttpStatus.FORBIDDEN)
 	protected ResponseEntity<Object> handleIllegalServerAccessException(IllegalServerAccessException ex,
 																		WebRequest request) {
 		log.error(ex.getStackTrace());
@@ -57,6 +60,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {FTPConnectException.class})
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	protected ResponseEntity<Object> handleFTPConnectException(FTPConnectException ex,
 															   WebRequest request) {
 		log.error(ex.toString());
@@ -66,6 +70,7 @@ public class RestExceptionHandler
 	}
 
 	@ExceptionHandler(value = {FTPOperationException.class})
+	@ResponseStatus(HttpStatus.FORBIDDEN)
 	protected ResponseEntity<Object> handleFTPOperationException(FTPOperationException ex,
 																 WebRequest request) {
 		log.error(ex.toString());
