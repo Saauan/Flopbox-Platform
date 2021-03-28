@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Provides operations for interacting with an ftp server
+ */
 @Service
 @CommonsLog
 public class FTPService {
@@ -171,6 +174,18 @@ public class FTPService {
 		ftpConnector.createDirectory(server, path, username, password);
 	}
 
+	/**
+	 * Downloads a directory in the form of a zip file
+	 *
+	 * @param serverId the id of the server
+	 * @param token    the authentication token of the user
+	 * @param path     the path where the directory is
+	 * @param username the FTP username of the user
+	 * @param password the FTP password of the user
+	 * @return a zip resource containing the requested files
+	 * @throws FTPConnectException   if there is an error while connecting to the server
+	 * @throws FTPOperationException if there is an error while performing the operation on the server
+	 */
 	@SneakyThrows
 	public Resource downloadDirectory(int serverId, String token, String path, String username, String password) {
 		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);

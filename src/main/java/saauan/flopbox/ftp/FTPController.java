@@ -10,6 +10,9 @@ import saauan.flopbox.Utils;
 
 import java.util.Map;
 
+/**
+ * Controller for FTP commands endpoints
+ */
 @RestController()
 @RequestMapping("/servers/{serverId}/")
 public class FTPController {
