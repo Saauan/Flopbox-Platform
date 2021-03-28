@@ -187,7 +187,7 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 
 	@Test
 	public void canCreateDirectory() throws Exception {
-		sendRequestToCreateDirectory(status().isOk(), ftpServerPOJO.getId(), "/home/myDir");
+		sendRequestToCreateDirectory(status().isCreated(), ftpServerPOJO.getId(), "/home/myDir");
 
 		Assertions.assertTrue(fakeFtpServer.getFileSystem().isDirectory("/home/myDir"));
 	}

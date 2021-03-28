@@ -40,11 +40,10 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 		authAndChangeUser(authUser1);
 		if (ftpServerPOJO == null) {
 			Server ftpServer = new Server(HOST, PORT);
-			ftpServerPOJO = objectMapper.readValue(objectMapper
-					.readTree(sendRequestToCreateServer(status().isCreated(), ftpServer).getResponse()
-							.getContentAsString())
-					.get("server").toString(), new TypeReference<>() {
-			});
+			ftpServerPOJO = objectMapper
+					.readValue(sendRequestToCreateServer(status().isCreated(), ftpServer).getResponse()
+							.getContentAsString(), new TypeReference<Server>() {
+					});
 		}
 		setUpFakeFTPServer();
 	}
