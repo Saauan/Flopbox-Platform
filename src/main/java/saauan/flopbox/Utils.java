@@ -16,12 +16,18 @@ import java.util.Optional;
 @UtilityClass
 public class Utils {
 
+	/**
+	 * Logs an exception and throws it
+	 */
 	@SneakyThrows
 	public void logAndThrow(Log log, Class<? extends RuntimeException> exceptionClass, String message) {
 		log.error(message);
 		throw exceptionClass.getDeclaredConstructor(String.class).newInstance(message);
 	}
 
+	/**
+	 * Finds an object by
+	 */
 	public <T, ID> T findObjectOrThrow(JpaRepository<T, ID> repository, ID id, Log log) {
 		Optional<T> object = repository.findById(id);
 		if (object.isEmpty()) {
@@ -29,6 +35,20 @@ public class Utils {
 			assert false : "Should never arrive here";
 		}
 		return object.get();
+	}
+
+	public <T, ID> T findObjectOrThrow(ObjectFinderOperation<T> op, Log log) {
+		Optional<T> object = op.findObject();
+		if (object.isEmpty()) {
+			logAndThrow(log, ResourceNotFoundException.class,
+					"resource was not found");
+			assert false : "Should never arrive here";
+		}
+		return object.get();
+	}
+
+	public interface ObjectFinderOperation<T> {
+		Optional<T> findObject();
 	}
 
 	public String getToken(HttpHeaders headers) {

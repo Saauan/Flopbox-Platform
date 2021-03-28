@@ -6,9 +6,9 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import saauan.flopbox.Utils;
 import saauan.flopbox.server.Server;
 import saauan.flopbox.server.ServerRepository;
 import saauan.flopbox.user.User;
@@ -49,10 +49,8 @@ public class FTPService {
 	 * @throws FTPOperationException if there is an error while performing the operation on the server
 	 */
 	public List<FTPFile> list(int serverId, String token, String path, String username, String password) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		return ftpConnector.list(server, path, username, password);
 	}
 
@@ -71,10 +69,8 @@ public class FTPService {
 	 */
 	public void store(int serverId, String token, String path, String username, String password, MultipartFile file,
 					  boolean binary) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		ftpConnector.sendFile(server, path, username, password, file, getFileType(binary));
 	}
 
@@ -93,10 +89,8 @@ public class FTPService {
 	@SneakyThrows
 	public Resource downloadFile(int serverId, String token, String path, String username, String password,
 								 boolean binary) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		File tempFile = getTemporaryFile(Path.of(path).getFileName().toString());
 		OutputStream out = new FileOutputStream(tempFile);
 
@@ -138,10 +132,8 @@ public class FTPService {
 	 * @throws FTPOperationException if there is an error while performing the operation on the server
 	 */
 	public void renameFile(int serverId, String token, String path, String to, String username, String password) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		ftpConnector.renameFile(server, path, to, username, password);
 	}
 
@@ -157,10 +149,8 @@ public class FTPService {
 	 * @throws FTPOperationException if there is an error while performing the operation on the server
 	 */
 	public void deleteFile(int serverId, String token, String path, String username, String password) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		ftpConnector.deleteFile(server, path, username, password);
 	}
 
@@ -176,19 +166,15 @@ public class FTPService {
 	 * @throws FTPOperationException if there is an error while performing the operation on the server
 	 */
 	public void createDirectory(int serverId, String token, String path, String username, String password) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		ftpConnector.createDirectory(server, path, username, password);
 	}
 
 	@SneakyThrows
 	public Resource downloadDirectory(int serverId, String token, String path, String username, String password) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		List<FTPFile> files = ftpConnector.list(server, path, username, password);
 		File zipFile = getTemporaryFile("ftpZip.zip");
 		FileOutputStream fos = new FileOutputStream(zipFile);
@@ -218,10 +204,8 @@ public class FTPService {
 	 * @throws FTPOperationException if there is an error while performing the operation on the server
 	 */
 	public void deleteDirectory(int serverId, String token, String path, String username, String password) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		ftpConnector.deleteDirectory(server, path, username, password);
 	}
 
@@ -238,10 +222,8 @@ public class FTPService {
 	 * @throws FTPOperationException if there is an error while performing the operation on the server
 	 */
 	public void renameDirectory(int serverId, String token, String path, String to, String username, String password) {
-		User user = userRepository.findByToken(token).orElseThrow();
-		Server server = serverRepository.findByIdAndUser(serverId, user)
-				.orElseThrow(
-						() -> new ResourceNotFoundException(String.format("The server %s was not found", serverId)));
+		User user = Utils.findObjectOrThrow(() -> userRepository.findByToken(token), log);
+		Server server = Utils.findObjectOrThrow(() -> serverRepository.findByIdAndUser(serverId, user), log);
 		ftpConnector.renameDirectory(server, path, to, username, password);
 	}
 }

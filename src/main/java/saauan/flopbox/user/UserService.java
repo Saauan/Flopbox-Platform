@@ -68,7 +68,7 @@ public class UserService {
 	 * @throws saauan.flopbox.exceptions.ResourceNotFoundException if the user if not found
 	 */
 	public User getUser(String username) {
-		return Utils.findObjectOrThrow(userRepository, username, log);
+		return Utils.findObjectOrThrow(() -> userRepository.findById(username), log);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class UserService {
 	 * @throws saauan.flopbox.exceptions.ResourceNotFoundException if the user if not found
 	 */
 	public void deleteUser(String username) {
-		User user = Utils.findObjectOrThrow(userRepository, username, log);
+		User user = Utils.findObjectOrThrow(() -> userRepository.findById(username), log);
 		userRepository.delete(user);
 	}
 
