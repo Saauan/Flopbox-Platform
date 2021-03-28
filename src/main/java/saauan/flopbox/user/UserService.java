@@ -16,7 +16,6 @@ import java.util.UUID;
 @CommonsLog
 public class UserService {
 
-	// TODO: Refactor into interfaces
 
 	private final UserRepository userRepository;
 	private final static String alphanumericRegex = "[a-zA-Z0-9]+";
@@ -82,9 +81,16 @@ public class UserService {
 		userRepository.delete(user);
 	}
 
+	/**
+	 * Logins the user with a username and a password. If they are correct, the user gets a new Token, if not, no token is returned
+	 *
+	 * @param username the username
+	 * @param password the password
+	 * @return an authentication token, or null
+	 */
 	public String login(String username, String password) {
 		Optional<User> optionalUser = userRepository.login(username, password);
-		if(optionalUser.isPresent()) {
+		if (optionalUser.isPresent()) {
 			String token = UUID.randomUUID().toString();
 			User user = optionalUser.get();
 			user.setToken(token);
@@ -95,6 +101,11 @@ public class UserService {
 		return StringUtils.EMPTY;
 	}
 
+	/**
+	 * Logs out the user by setting its token to null
+	 *
+	 * @param token the token of the user
+	 */
 	public void logout(String token) {
 		User user = userRepository.findByToken(token).orElseThrow();
 		user.setToken(null);

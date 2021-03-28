@@ -43,7 +43,6 @@ public class ServerController {
 										 @RequestHeader HttpHeaders headers) {
 		try {
 			return Utils.mapify(serverService.addServer(server, Utils.getToken(headers)), "server");
-			// TODO: test
 		} catch (ResourceAlreadyExistException e) {
 			throw new ResponseStatusException(
 					HttpStatus.FORBIDDEN, e.getMessage(), e);

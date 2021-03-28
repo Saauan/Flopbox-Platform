@@ -8,6 +8,9 @@ import saauan.flopbox.exceptions.ResourceAlreadyExistException;
 
 import java.util.List;
 
+/**
+ * Controller for user related MVC Endpoints
+ */
 @RestController()
 @RequestMapping("users")
 public class UserController {

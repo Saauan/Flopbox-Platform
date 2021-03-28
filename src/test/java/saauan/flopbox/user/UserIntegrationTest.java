@@ -50,8 +50,6 @@ public class UserIntegrationTest extends AbstractIntegrationTest {
 		sendRequestToCreateUser(status().isBadRequest(), userToCreate);
 	}
 
-	// TODO: Cannot create user if arguments are incorrect
-
 	@Test
 	public void getUsersReturnsAListOfUsers() throws Exception {
 		sendRequestToCreateUser(status().isCreated(), user1);

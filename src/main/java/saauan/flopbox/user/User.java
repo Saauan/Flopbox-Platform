@@ -1,13 +1,16 @@
 package saauan.flopbox.user;
 
 import lombok.*;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.UUID;
 
+/**
+ * A user is an entity that can use the FlopBox application.
+ * <p>
+ * He owns a token that allows him to authenticate himself
+ */
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -24,6 +27,5 @@ public class User {
 	private String password;
 
 	@EqualsAndHashCode.Exclude
-//	@Type(type = "uuid-char")
 	private String token;
 }
