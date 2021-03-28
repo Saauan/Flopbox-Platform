@@ -194,17 +194,30 @@ public class FTPService {
 		File zipFile = getTemporaryFile("ftpZip.zip");
 		FileOutputStream fos = new FileOutputStream(zipFile);
 		ZipOutputStream zipOut = new ZipOutputStream(fos);
-		for (FTPFile file : files) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ftpConnector.downloadFile(server, file.getName(), username, password, bos, FileType.BINARY);
-			ZipEntry zipEntry = new ZipEntry(file.getName());
-			zipOut.putNextEntry(zipEntry);
-			zipOut.write(bos.toByteArray());
-			bos.close();
-		}
+		addFilesToZip(path, username, password, server, files, zipOut);
 		zipOut.close();
 		fos.close();
 		return new FileSystemResource(zipFile);
+	}
+
+	private void addFilesToZip(String path, String username, String password, Server server, List<FTPFile> files,
+							   ZipOutputStream zipOut) throws IOException {
+		for (FTPFile file : files) {
+			if (file.isDirectory()) {
+				String newPath = path + "/" + file.getName();
+				List<FTPFile> newFiles = ftpConnector.list(server, newPath, username, password);
+				addFilesToZip(newPath, username, password, server, newFiles, zipOut);
+			} else {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				ftpConnector
+						.downloadFile(server, path + "/" + file.getName(), username, password, bos, FileType.BINARY);
+				ZipEntry zipEntry = new ZipEntry(path + "/" + file.getName());
+				zipOut.putNextEntry(zipEntry);
+				zipOut.write(bos.toByteArray());
+				bos.close();
+			}
+
+		}
 	}
 
 	/**
