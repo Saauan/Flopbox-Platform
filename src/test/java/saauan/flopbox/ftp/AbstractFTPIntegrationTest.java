@@ -85,19 +85,24 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 				MockMvcRequestBuilders.get(String.format("/servers/%s/files?path=%s&binary=true", serverId, path)));
 	}
 
-	protected MvcResult uploadFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
-										   MockMultipartFile jsonFile) throws Exception {
-		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
+	protected MvcResult downloadFiles(ResultMatcher expectedResponseCode, int serverId, String path) throws Exception {
+		return sendRequestToFlopBox(expectedResponseCode,
+				MockMvcRequestBuilders.get(String.format("/servers/%s/directories?path=%s", serverId, path)));
+	}
+
+	protected void uploadFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
+									  MockMultipartFile jsonFile) throws Exception {
+		sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
 				.multipart(String.format("/servers/%s/files?path=%s&binary=false", serverId, path))
 				.file(jsonFile)
 				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
 	}
 
-	protected MvcResult uploadFilesToServer(ResultMatcher expectedResponseCode, int serverId, String path1,
-											String path2,
-											MockMultipartFile jsonFile, MockMultipartFile jsonFile2, boolean binary1,
-											boolean binary2) throws Exception {
-		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
+	protected void uploadFilesToServer(ResultMatcher expectedResponseCode, int serverId, String path1,
+									   String path2,
+									   MockMultipartFile jsonFile, MockMultipartFile jsonFile2, boolean binary1,
+									   boolean binary2) throws Exception {
+		sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
 				.multipart(
 						String.format("/servers/%s/files?path=%s&path=%s&binary=%s&binary=%s", serverId, path1, path2,
 								binary1, binary2))
@@ -105,9 +110,9 @@ public abstract class AbstractFTPIntegrationTest extends AbstractIntegrationTest
 				.contentType(Objects.requireNonNull(jsonFile.getContentType())));
 	}
 
-	protected MvcResult uploadBinaryFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
-												 MockMultipartFile jsonFile) throws Exception {
-		return sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
+	protected void uploadBinaryFileToServer(ResultMatcher expectedResponseCode, int serverId, String path,
+											MockMultipartFile jsonFile) throws Exception {
+		sendRequestToFlopBox(expectedResponseCode, MockMvcRequestBuilders
 				.multipart(String.format("/servers/%s/files?path=%s&binary=true", serverId, path))
 				.file(jsonFile)
 				.contentType(Objects.requireNonNull(jsonFile.getContentType())));

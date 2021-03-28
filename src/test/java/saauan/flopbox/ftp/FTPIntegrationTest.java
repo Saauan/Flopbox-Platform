@@ -10,7 +10,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import saauan.flopbox.CustomFTPFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -139,6 +143,46 @@ public class FTPIntegrationTest extends AbstractFTPIntegrationTest {
 		for (int i = 0; i < fileContent.length; i++) {
 			Assertions.assertEquals(fileContent[i], actualFileContent[i]);
 		}
+	}
+
+	@Test
+	public void canDownloadMultipleFiles() throws Exception {
+		byte[] imgFileContent = getClass().getClassLoader().getResourceAsStream("chibi_doctor.jpg").readAllBytes();
+		MockMultipartFile imgFile = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
+				imgFileContent);
+		String txtFileContent = String.format("{\"key1\": \"value1\"}%sHelloWorld", System.lineSeparator());
+		MockMultipartFile jsonFile = new MockMultipartFile("file", "test.json", MediaType.APPLICATION_JSON.toString(),
+				txtFileContent.getBytes());
+		uploadFilesToServer(status().isOk(), ftpServerPOJO.getId(), "/home/test.jpg", "/home/test.json", imgFile,
+				jsonFile,
+				true, false);
+
+		MvcResult result = downloadFiles(status().isOk(), ftpServerPOJO.getId(), "/home");
+
+		ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(result.getResponse().getContentAsByteArray()));
+		ZipEntry zipEntry = zis.getNextEntry();
+		int nbEntries = 0;
+		byte[] buffer = new byte[1024];
+		while (zipEntry != null) {
+			nbEntries++;
+			ByteArrayOutputStream entryBytes = new ByteArrayOutputStream();
+			int len = 0;
+			while ((len = zis.read(buffer)) > 0) {
+				entryBytes.write(buffer, 0, len);
+			}
+			byte[] bytesContent = entryBytes.toByteArray();
+			if (zipEntry.getName().equals("test.jpg")) {
+				checkBinaryFilesAreEquals(imgFileContent, bytesContent);
+			} else if (zipEntry.getName().equals("test.json")) {
+				checkBinaryFilesAreEquals(txtFileContent.getBytes(), bytesContent);
+			} else {
+				System.err.println(zipEntry.getName());
+			}
+			zipEntry = zis.getNextEntry();
+		}
+		Assertions.assertEquals(4, nbEntries);
+		zis.closeEntry();
+		zis.close();
 	}
 
 	@Test

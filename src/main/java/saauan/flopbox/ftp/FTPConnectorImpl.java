@@ -80,7 +80,7 @@ public class FTPConnectorImpl implements FTPConnector {
 		log.debug(String.format("Connecting to the FTP Server %s", server.getUrl()));
 		FTPClient ftpClient = new FTPClient();
 		ftpClient.connect(server.getUrl(), server.getPort());
-		ftpClient.enterLocalPassiveMode();
+		if (server.isPassive()) ftpClient.enterLocalPassiveMode();
 		if (username != null && !username.isBlank()) {
 			log.debug("Login in the server");
 			if (!ftpClient.login(username, password)) {
