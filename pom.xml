@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>saauan</groupId>
 	<artifactId>flopbox</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>FlopBox</name>
 	<description>SR2 Project</description>
 	<properties>
