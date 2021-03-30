@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "user")
+@Table(name = "flopboxuser")
 @EqualsAndHashCode
 @ToString
 public class User {
